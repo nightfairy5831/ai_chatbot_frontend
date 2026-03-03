@@ -243,8 +243,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       {/* Products Tab */}
       {activeTab === 'products' && (
         <div className="tab-content">
-          <div className="dashboard-header">
-            <h3 style={{ margin: 0 }}>Products / Services</h3>
+          <div className="dashboard-actions">
             {!showProductForm && (
               <button className="btn-primary" onClick={openProductCreate}><Plus size={16} /> Add Product</button>
             )}
@@ -276,21 +275,22 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           {products.length === 0 ? (
             <div className="empty-state"><p>No products yet. Add your first product or service.</p></div>
           ) : (
-            <div className="agent-list">
+            <div className="product-grid">
               {products.map((p) => (
-                <div className="agent-card" key={p.id}>
-                  <div className="agent-card-header">
-                    <div className="agent-card-icon">
-                      <Package size={20} />
+                <div className="product-card" key={p.id}>
+                  <div className="product-card-col">
+                    <div className="product-card-icon">
+                      <Package size={36} />
                     </div>
-                    <div className="agent-card-body">
-                      <p className="agent-card-name">{p.name}{p.price && <span className="product-price"> — ${p.price}</span>}</p>
-                      {p.description && <p className="agent-card-desc">{p.description}</p>}
-                    </div>
-                    <div className="agent-card-actions">
-                      <button className="btn-icon" title="Edit" onClick={() => openProductEdit(p)}><Pencil size={15} /></button>
-                      <button className="btn-icon danger" title="Delete" onClick={() => deleteProduct(p)}><Trash2 size={15} /></button>
-                    </div>
+                    {p.price && <span className="product-card-price">${p.price}</span>}
+                  </div>
+                  <div className="product-card-col product-card-info">
+                    <p className="product-card-name">{p.name}</p>
+                    {p.description && <p className="product-card-desc">{p.description}</p>}
+                  </div>
+                  <div className="product-card-col product-card-actions">
+                    <button className="btn-icon" title="Edit" onClick={() => openProductEdit(p)}><Pencil size={17} /></button>
+                    <button className="btn-icon danger" title="Delete" onClick={() => deleteProduct(p)}><Trash2 size={17} /></button>
                   </div>
                 </div>
               ))}
@@ -301,17 +301,21 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
 
       {/* Prompt & Test Tab */}
       {activeTab === 'prompt' && (
-        <div className="tab-content">
+        <div className="tab-content prompt-test-layout">
           <div className="prompt-section">
-            <div className="dashboard-header">
-              <h3 style={{ margin: 0 }}><Sparkles size={18} /> Generated Prompt</h3>
+            <div className="prompt-section-header">
+              <h3><Sparkles size={18} /> Generated Prompt</h3>
               <button className="btn-primary" onClick={generatePrompt} disabled={promptLoading}>
                 {promptLoading ? 'Generating...' : <><Sparkles size={16} /> Generate Prompt</>}
               </button>
             </div>
-            {generatedPrompt && (
-              <pre className="prompt-preview">{generatedPrompt}</pre>
-            )}
+            <div className="prompt-preview-scroll">
+              {generatedPrompt ? (
+                <pre className="prompt-preview">{generatedPrompt}</pre>
+              ) : (
+                <div className="empty-state"><p>Click "Generate Prompt" to preview your agent's prompt.</p></div>
+              )}
+            </div>
           </div>
 
           <div className="chat-section">
@@ -328,13 +332,15 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 {chatLoading ? 'Sending...' : <><Send size={16} /> Send</>}
               </button>
             </div>
-            {chatError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{chatError}</p>}
-            {chatResponse && (
-              <div className="chat-response">
-                <p className="chat-response-label">AI Response:</p>
-                <p className="chat-response-text">{chatResponse}</p>
-              </div>
-            )}
+            <div className="chat-response-scroll">
+              {chatError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{chatError}</p>}
+              {chatResponse && (
+                <div className="chat-response">
+                  <p className="chat-response-label">AI Response:</p>
+                  <p className="chat-response-text">{chatResponse}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -130,7 +130,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
       {activeTab === 'profile' && (
         <div className="tab-content">
           <form className="agent-form" onSubmit={handleProfileSave}>
-            <h3 className="settings-section-title"><User size={18} /> Profile</h3>
+            <h3 className="settings-section-title"><User size={22} /> Profile</h3>
             <div className="form-group">
               <label>Username</label>
               <input className="form-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your username" />
@@ -146,13 +146,13 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
             )}
             <div className="form-actions">
               <button className="btn-primary" type="submit" disabled={profileSaving}>
-                <Save size={16} /> {profileSaving ? 'Saving...' : 'Save Changes'}
+                <Save size={18} /> {profileSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
 
           <form className="agent-form" onSubmit={handlePasswordChange}>
-            <h3 className="settings-section-title"><Lock size={18} /> Change Password</h3>
+            <h3 className="settings-section-title"><Lock size={22} /> Change Password</h3>
             <div className="form-group">
               <label>Current Password</label>
               <input className="form-input" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" required />
@@ -172,7 +172,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
             )}
             <div className="form-actions">
               <button className="btn-primary" type="submit" disabled={passwordSaving}>
-                <Lock size={16} /> {passwordSaving ? 'Changing...' : 'Change Password'}
+                <Lock size={18} /> {passwordSaving ? 'Changing...' : 'Change Password'}
               </button>
             </div>
           </form>
@@ -182,10 +182,10 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
       {activeTab === 'api' && (
         <div className="tab-content">
           <div className="agent-form">
-            <h3 className="settings-section-title"><Activity size={18} /> API Health Check</h3>
+            <h3 className="settings-section-title"><Activity size={22} /> API Health Check</h3>
             <div className="form-actions" style={{ marginTop: 0 }}>
               <button className="btn-primary" type="button" onClick={handleHealthCheck} disabled={healthLoading}>
-                <Activity size={16} /> {healthLoading ? 'Checking...' : 'Run Health Check'}
+                <Activity size={18} /> {healthLoading ? 'Checking...' : 'Run Health Check'}
               </button>
             </div>
 

@@ -58,7 +58,7 @@ function App() {
     <div className="app-layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <Bot size={22} />
+          <Bot size={26} />
           <span>AI Chatbot</span>
         </div>
 
@@ -67,14 +67,14 @@ function App() {
             className={`sidebar-nav-item${activePage === 'dashboard' || activePage === 'agent-detail' ? ' active' : ''}`}
             onClick={handleBackToDashboard}
           >
-            <LayoutDashboard size={20} />
+            <LayoutDashboard size={22} />
             Dashboard
           </button>
           <button
             className={`sidebar-nav-item${activePage === 'settings' ? ' active' : ''}`}
             onClick={() => setActivePage('settings')}
           >
-            <SettingsIcon size={20} />
+            <SettingsIcon size={22} />
             Settings
           </button>
         </nav>
@@ -89,7 +89,7 @@ function App() {
             </div>
           )}
           <button className="sidebar-logout" onClick={handleLogout}>
-            <LogOut size={18} />
+            <LogOut size={22} />
             Logout
           </button>
         </div>
