@@ -66,6 +66,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       setIndustry(data.industry || '')
       setTone(data.tone || 'professional')
       setInstructions(data.instructions || '')
+      if (data.prompt_template) setGeneratedPrompt(data.prompt_template)
     } catch (err: any) {
       if (err.response?.status === 401) { onLogout(); return }
     } finally {
