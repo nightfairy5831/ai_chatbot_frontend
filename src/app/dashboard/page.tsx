@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, Bot } from 'lucide-react'
+import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Agent {
@@ -9,8 +9,17 @@ interface Agent {
   user_id: number
 }
 
+interface Stats {
+  total_agents: number
+  total_products: number
+  total_questions: number
+  most_used_agent: { id: number; name: string; question_count: number } | null
+  recent_agent: { id: number; name: string } | null
+}
+
 function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgent: (id: number) => void }) {
   const [agents, setAgents] = useState<Agent[]>([])
+  const [stats, setStats] = useState<Stats>({ total_agents: 0, total_products: 0, total_questions: 0, most_used_agent: null, recent_agent: null })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -20,23 +29,27 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const fetchAgents = async () => {
+  const fetchData = async () => {
     try {
-      const data = await Request.Get('/agents/')
-      setAgents(data)
+      const [agentsData, statsData] = await Promise.all([
+        Request.Get('/agents/'),
+        Request.Get('/agents/stats'),
+      ])
+      setAgents(agentsData)
+      setStats(statsData)
     } catch (err: any) {
       if (err.response?.status === 401) {
         onLogout()
         return
       }
-      setError(err.response?.data?.detail || 'Failed to load agents')
+      setError(err.response?.data?.detail || 'Failed to load dashboard')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchAgents()
+    fetchData()
   }, [])
 
   const openCreateForm = () => {
@@ -85,7 +98,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
         })
       }
       closeForm()
-      await fetchAgents()
+      await fetchData()
     } catch (err: any) {
       setFormError(err.response?.data?.detail || 'Failed to save agent')
     } finally {
@@ -98,7 +111,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
     if (!confirm(`Delete "${agent.name}"? This cannot be undone.`)) return
     try {
       await Request.Delete(`/agents/${agent.id}`)
-      await fetchAgents()
+      await fetchData()
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to delete agent')
     }
@@ -109,15 +122,60 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
   return (
     <div>
       <div className="dashboard-header">
-        <h2>Your Agents</h2>
+        <h2>Dashboard</h2>
+      </div>
+
+      {error && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{error}</p>}
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: 'rgba(79, 110, 247, 0.1)', color: '#4f6ef7' }}>
+            <Bot size={26} />
+          </div>
+          <div className="stat-card-info">
+            <span className="stat-card-value">{stats.total_agents}</span>
+            <span className="stat-card-label">Total Agents</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+            <Box size={26} />
+          </div>
+          <div className="stat-card-info">
+            <span className="stat-card-value">{stats.total_products}</span>
+            <span className="stat-card-label">Total Products</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
+            <TrendingUp size={26} />
+          </div>
+          <div className="stat-card-info">
+            <span className="stat-card-value stat-card-value-name">{stats.most_used_agent?.name || '—'}</span>
+            <span className="stat-card-label">Most Used Agent</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+            <MessageSquare size={26} />
+          </div>
+          <div className="stat-card-info">
+            <span className="stat-card-value">{stats.total_questions}</span>
+            <span className="stat-card-label">Total Questions</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-actions">
         {!showForm && (
           <button className="btn-primary" onClick={openCreateForm}>
             <Plus size={16} /> Create Agent
           </button>
         )}
       </div>
-
-      {error && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{error}</p>}
 
       {showForm && (
         <form className="agent-form" onSubmit={handleSubmit}>
@@ -166,7 +224,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
             <div className="agent-card clickable" key={agent.id} onClick={() => onOpenAgent(agent.id)}>
               <div className="agent-card-header">
                 <div className="agent-card-icon">
-                  <Bot size={20} />
+                  <Bot size={24} />
                 </div>
                 <div className="agent-card-body">
                   <p className="agent-card-name">{agent.name}</p>
