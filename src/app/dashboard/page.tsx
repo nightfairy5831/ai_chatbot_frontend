@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Plus, Pencil, Trash2, Bot } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Agent {
@@ -103,7 +104,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
     }
   }
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return <div className="loading-state"><div className="spinner" />Loading...</div>
 
   return (
     <div>
@@ -111,7 +112,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
         <h2>Your Agents</h2>
         {!showForm && (
           <button className="btn-primary" onClick={openCreateForm}>
-            + Create Agent
+            <Plus size={16} /> Create Agent
           </button>
         )}
       </div>
@@ -164,18 +165,21 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
           {agents.map((agent) => (
             <div className="agent-card clickable" key={agent.id} onClick={() => onOpenAgent(agent.id)}>
               <div className="agent-card-header">
-                <div>
+                <div className="agent-card-icon">
+                  <Bot size={20} />
+                </div>
+                <div className="agent-card-body">
                   <p className="agent-card-name">{agent.name}</p>
                   {agent.description && (
                     <p className="agent-card-desc">{agent.description}</p>
                   )}
                 </div>
                 <div className="agent-card-actions">
-                  <button className="btn-icon" onClick={(e) => openEditForm(e, agent)}>
-                    Edit
+                  <button className="btn-icon" title="Edit" onClick={(e) => openEditForm(e, agent)}>
+                    <Pencil size={15} />
                   </button>
-                  <button className="btn-icon danger" onClick={(e) => handleDelete(e, agent)}>
-                    Delete
+                  <button className="btn-icon danger" title="Delete" onClick={(e) => handleDelete(e, agent)}>
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
