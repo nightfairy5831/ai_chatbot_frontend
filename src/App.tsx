@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut } from 'lucide-react'
 import './App.css'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
@@ -57,7 +58,7 @@ function App() {
     <div className="app-layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <span>🤖</span>
+          <Bot size={22} />
           <span>AI Chatbot</span>
         </div>
 
@@ -66,13 +67,15 @@ function App() {
             className={`sidebar-nav-item${activePage === 'dashboard' || activePage === 'agent-detail' ? ' active' : ''}`}
             onClick={handleBackToDashboard}
           >
-            📊 Dashboard
+            <LayoutDashboard size={20} />
+            Dashboard
           </button>
           <button
             className={`sidebar-nav-item${activePage === 'settings' ? ' active' : ''}`}
             onClick={() => setActivePage('settings')}
           >
-            ⚙️ Settings
+            <SettingsIcon size={20} />
+            Settings
           </button>
         </nav>
 
@@ -86,7 +89,8 @@ function App() {
             </div>
           )}
           <button className="sidebar-logout" onClick={handleLogout}>
-            🚪 Logout
+            <LogOut size={18} />
+            Logout
           </button>
         </div>
       </aside>
@@ -96,7 +100,7 @@ function App() {
         {activePage === 'agent-detail' && selectedAgentId && (
           <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />
         )}
-        {activePage === 'settings' && <Settings />}
+        {activePage === 'settings' && <Settings onLogout={handleLogout} onUsernameChange={setUsername} />}
       </main>
     </div>
   )

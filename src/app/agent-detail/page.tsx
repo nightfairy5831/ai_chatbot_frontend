@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Product {
@@ -189,13 +190,13 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     }
   }
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return <div className="loading-state"><div className="spinner" />Loading...</div>
   if (!agent) return <p>Agent not found.</p>
 
   return (
     <div>
+      <button className="btn-back" onClick={onBack}><ArrowLeft size={16} /> Back</button>
       <div className="detail-header">
-        <button className="btn-back" onClick={onBack}>← Back</button>
         <h2>{agent.name}</h2>
       </div>
       {agent.description && <p className="detail-desc">{agent.description}</p>}
@@ -245,7 +246,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           <div className="dashboard-header">
             <h3 style={{ margin: 0 }}>Products / Services</h3>
             {!showProductForm && (
-              <button className="btn-primary" onClick={openProductCreate}>+ Add Product</button>
+              <button className="btn-primary" onClick={openProductCreate}><Plus size={16} /> Add Product</button>
             )}
           </div>
 
@@ -262,7 +263,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
               </div>
               <div className="form-group">
                 <label>Price</label>
-                <input className="form-input" value={pPrice} onChange={(e) => setPPrice(e.target.value)} placeholder="$29.99" />
+                <input className="form-input" type="number" step="0.01" min="0" value={pPrice} onChange={(e) => setPPrice(e.target.value)} placeholder="29.99" />
               </div>
               {pError && <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>{pError}</p>}
               <div className="form-actions">
@@ -279,13 +280,16 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
               {products.map((p) => (
                 <div className="agent-card" key={p.id}>
                   <div className="agent-card-header">
-                    <div>
-                      <p className="agent-card-name">{p.name}{p.price && <span className="product-price"> — {p.price}</span>}</p>
+                    <div className="agent-card-icon">
+                      <Package size={20} />
+                    </div>
+                    <div className="agent-card-body">
+                      <p className="agent-card-name">{p.name}{p.price && <span className="product-price"> — ${p.price}</span>}</p>
                       {p.description && <p className="agent-card-desc">{p.description}</p>}
                     </div>
                     <div className="agent-card-actions">
-                      <button className="btn-icon" onClick={() => openProductEdit(p)}>Edit</button>
-                      <button className="btn-icon danger" onClick={() => deleteProduct(p)}>Delete</button>
+                      <button className="btn-icon" title="Edit" onClick={() => openProductEdit(p)}><Pencil size={15} /></button>
+                      <button className="btn-icon danger" title="Delete" onClick={() => deleteProduct(p)}><Trash2 size={15} /></button>
                     </div>
                   </div>
                 </div>
@@ -300,9 +304,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
         <div className="tab-content">
           <div className="prompt-section">
             <div className="dashboard-header">
-              <h3 style={{ margin: 0 }}>Generated Prompt</h3>
+              <h3 style={{ margin: 0 }}><Sparkles size={18} /> Generated Prompt</h3>
               <button className="btn-primary" onClick={generatePrompt} disabled={promptLoading}>
-                {promptLoading ? 'Generating...' : 'Generate Prompt'}
+                {promptLoading ? 'Generating...' : <><Sparkles size={16} /> Generate Prompt</>}
               </button>
             </div>
             {generatedPrompt && (
@@ -311,7 +315,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           </div>
 
           <div className="chat-section">
-            <h3>Test Chat</h3>
+            <h3><MessageSquare size={18} /> Test Chat</h3>
             <div className="chat-input-row">
               <input
                 className="form-input"
@@ -321,7 +325,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 onKeyDown={(e) => e.key === 'Enter' && !chatLoading && sendChat()}
               />
               <button className="btn-primary" onClick={sendChat} disabled={chatLoading || !chatMessage.trim()}>
-                {chatLoading ? 'Sending...' : 'Send'}
+                {chatLoading ? 'Sending...' : <><Send size={16} /> Send</>}
               </button>
             </div>
             {chatError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{chatError}</p>}
