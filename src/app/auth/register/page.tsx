@@ -259,8 +259,9 @@ function Register({ onRegister, onSwitchToLogin }: { onRegister: (token: string)
             style={{
               marginTop: '0.2rem',
               accentColor: '#4f6ef7',
-              width: '16px',
-              height: '16px',
+              width: '20px',
+              height: '20px',
+              minWidth: '20px',
               cursor: 'pointer',
             }}
           />

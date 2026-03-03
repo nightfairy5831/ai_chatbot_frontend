@@ -8,7 +8,7 @@ interface Agent {
   user_id: number
 }
 
-function Dashboard({ onLogout }: { onLogout: () => void }) {
+function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgent: (id: number) => void }) {
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -46,7 +46,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     setShowForm(true)
   }
 
-  const openEditForm = (agent: Agent) => {
+  const openEditForm = (e: React.MouseEvent, agent: Agent) => {
+    e.stopPropagation()
     setEditingAgent(agent)
     setFormName(agent.name)
     setFormDescription(agent.description || '')
@@ -91,7 +92,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }
   }
 
-  const handleDelete = async (agent: Agent) => {
+  const handleDelete = async (e: React.MouseEvent, agent: Agent) => {
+    e.stopPropagation()
     if (!confirm(`Delete "${agent.name}"? This cannot be undone.`)) return
     try {
       await Request.Delete(`/agents/${agent.id}`)
@@ -160,7 +162,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       ) : (
         <div className="agent-list">
           {agents.map((agent) => (
-            <div className="agent-card" key={agent.id}>
+            <div className="agent-card clickable" key={agent.id} onClick={() => onOpenAgent(agent.id)}>
               <div className="agent-card-header">
                 <div>
                   <p className="agent-card-name">{agent.name}</p>
@@ -169,10 +171,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   )}
                 </div>
                 <div className="agent-card-actions">
-                  <button className="btn-icon" onClick={() => openEditForm(agent)}>
+                  <button className="btn-icon" onClick={(e) => openEditForm(e, agent)}>
                     Edit
                   </button>
-                  <button className="btn-icon danger" onClick={() => handleDelete(agent)}>
+                  <button className="btn-icon danger" onClick={(e) => handleDelete(e, agent)}>
                     Delete
                   </button>
                 </div>
