@@ -589,7 +589,7 @@ textarea.form-input {
 .tab-content {
   max-width: 100%;
   overflow-y: auto;
-  max-height: calc(100vh - 14rem);
+  max-height: calc(100vh - 5rem);
 }
 
 /* Product grid & cards */
@@ -688,7 +688,7 @@ textarea.form-input {
 .prompt-test-layout {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 22rem);
+  height: calc(100vh - 17.5rem);
   min-height: 300px;
 }
 
