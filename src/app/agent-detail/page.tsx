@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Product {
@@ -18,6 +18,7 @@ interface Agent {
   industry: string | null
   tone: string | null
   instructions: string | null
+  sinstruction: string | null
   prompt_template: string | null
   products: Product[]
 }
@@ -37,6 +38,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const [instructions, setInstructions] = useState('')
   const [configSaving, setConfigSaving] = useState(false)
   const [configMsg, setConfigMsg] = useState<string | null>(null)
+  const [sinstruction, setSinstruction] = useState<string | null>(null)
+  const [pdfUploading, setPdfUploading] = useState(false)
+  const [pdfMsg, setPdfMsg] = useState<string | null>(null)
 
   // Products
   const [products, setProducts] = useState<Product[]>([])
@@ -66,6 +70,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       setIndustry(data.industry || '')
       setTone(data.tone || 'professional')
       setInstructions(data.instructions || '')
+      setSinstruction(data.sinstruction || null)
       if (data.prompt_template) setGeneratedPrompt(data.prompt_template)
     } catch (err: any) {
       if (err.response?.status === 401) { onLogout(); return }
@@ -103,6 +108,43 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       setConfigMsg('Failed to save')
     } finally {
       setConfigSaving(false)
+    }
+  }
+
+  // PDF upload handlers
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.type !== 'application/pdf') {
+      setPdfMsg('Only PDF files are accepted')
+      setTimeout(() => setPdfMsg(null), 3000)
+      return
+    }
+    setPdfUploading(true)
+    setPdfMsg(null)
+    try {
+      const data = await Request.Upload(`/agents/${agentId}/upload-sinstruction`, file)
+      setSinstruction(data.sinstruction)
+      setPdfMsg('PDF uploaded successfully!')
+      setTimeout(() => setPdfMsg(null), 3000)
+    } catch (err: any) {
+      setPdfMsg(err.response?.data?.detail || 'Failed to upload PDF')
+      setTimeout(() => setPdfMsg(null), 3000)
+    } finally {
+      setPdfUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const removeSinstruction = async () => {
+    try {
+      await Request.Delete(`/agents/${agentId}/sinstruction`)
+      setSinstruction(null)
+      setPdfMsg('Special instruction removed')
+      setTimeout(() => setPdfMsg(null), 3000)
+    } catch {
+      setPdfMsg('Failed to remove')
+      setTimeout(() => setPdfMsg(null), 3000)
     }
   }
 
@@ -231,6 +273,50 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           <div className="form-group">
             <label>Custom Instructions</label>
             <textarea className="form-input" value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Special instructions for the AI agent..." rows={4} />
+          </div>
+          <div className="form-group">
+            <label>Special Instruction (PDF Upload)</label>
+            {sinstruction ? (
+              <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', background: '#f9fafb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#16a34a', fontWeight: 500 }}>PDF content loaded ({sinstruction.length} characters)</span>
+                  <button
+                    className="btn-icon danger"
+                    title="Remove"
+                    onClick={removeSinstruction}
+                    style={{ padding: '0.25rem' }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <pre style={{ fontSize: '0.8rem', color: '#4b5563', maxHeight: '150px', overflow: 'auto', whiteSpace: 'pre-wrap', margin: 0 }}>
+                  {sinstruction.substring(0, 500)}{sinstruction.length > 500 ? '...' : ''}
+                </pre>
+              </div>
+            ) : (
+              <div style={{ border: '2px dashed #d1d5db', borderRadius: '8px', padding: '1.5rem', textAlign: 'center', background: '#f9fafb' }}>
+                <Upload size={24} style={{ color: '#9ca3af', marginBottom: '0.5rem' }} />
+                <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.75rem' }}>
+                  Upload a PDF file to add special instructions for this agent
+                </p>
+                <label className="btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Upload size={16} />
+                  {pdfUploading ? 'Uploading...' : 'Choose PDF'}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfUpload}
+                    disabled={pdfUploading}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
+            )}
+            {pdfMsg && (
+              <span style={{ color: pdfMsg.includes('Failed') || pdfMsg.includes('Only') ? '#dc2626' : '#16a34a', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                {pdfMsg}
+              </span>
+            )}
           </div>
           <div className="form-actions">
             <button className="btn-primary" onClick={saveConfig} disabled={configSaving}>
