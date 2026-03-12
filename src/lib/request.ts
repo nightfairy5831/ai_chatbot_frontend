@@ -69,6 +69,14 @@ const Request = {
     const response = await axiosInstance.patch(url, data)
     return response.data
   },
+  async Upload(url: string, file: File, fieldName: string = 'file') {
+    const formData = new FormData()
+    formData.append(fieldName, file)
+    const response = await axiosInstance.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
   async Delete(url: string) {
     const response = await axiosInstance.delete(url)
     return response.data
