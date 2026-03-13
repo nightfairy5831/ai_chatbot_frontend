@@ -299,8 +299,12 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.75rem' }}>
                   Upload a PDF file to add special instructions for this agent
                 </p>
-                <label className="btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Upload size={16} />
+                <label className="btn-primary" style={{ cursor: pdfUploading ? 'not-allowed' : 'pointer', opacity: pdfUploading ? 0.7 : 1, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {pdfUploading ? (
+                    <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                  ) : (
+                    <Upload size={16} />
+                  )}
                   {pdfUploading ? 'Uploading...' : 'Choose PDF'}
                   <input
                     type="file"
