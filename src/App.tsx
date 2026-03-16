@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, MessageSquare, Activity } from 'lucide-react'
+import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity } from 'lucide-react'
 import './App.css'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
