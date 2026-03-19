@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity } from 'lucide-react'
+import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity, Menu, X } from 'lucide-react'
 import './App.css'
 import LandingPage from './app/landing/page'
 import Login from './app/auth/login/page'
@@ -19,6 +19,7 @@ function App() {
   const [testAgentId, setTestAgentId] = useState<number | null>(null)
   const [username, setUsername] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (token) {
@@ -70,7 +71,8 @@ function App() {
 
   return (
     <div className="app-layout">
-      <aside className="sidebar">
+      <div className={`sidebar-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo">
           <Bot size={26} />
           <span>AI Chatbot</span>
@@ -81,28 +83,28 @@ function App() {
             <>
               <button
                 className={`sidebar-nav-item${activePage === 'admin-dashboard' ? ' active' : ''}`}
-                onClick={() => setActivePage('admin-dashboard')}
+                onClick={() => { setActivePage('admin-dashboard'); setSidebarOpen(false) }}
               >
                 <LayoutDashboard size={22} />
                 Dashboard
               </button>
               <button
                 className={`sidebar-nav-item${activePage === 'admin-users' ? ' active' : ''}`}
-                onClick={() => setActivePage('admin-users')}
+                onClick={() => { setActivePage('admin-users'); setSidebarOpen(false) }}
               >
                 <Users size={22} />
                 Users
               </button>
               <button
                 className={`sidebar-nav-item${activePage === 'admin-agents' ? ' active' : ''}`}
-                onClick={() => setActivePage('admin-agents')}
+                onClick={() => { setActivePage('admin-agents'); setSidebarOpen(false) }}
               >
                 <Bot size={22} />
                 Agents
               </button>
               <button
                 className={`sidebar-nav-item${activePage === 'admin-logs' ? ' active' : ''}`}
-                onClick={() => setActivePage('admin-logs')}
+                onClick={() => { setActivePage('admin-logs'); setSidebarOpen(false) }}
               >
                 <Activity size={22} />
                 Activity Logs
@@ -112,14 +114,14 @@ function App() {
             <>
               <button
                 className={`sidebar-nav-item${activePage === 'dashboard' || activePage === 'agent-detail' ? ' active' : ''}`}
-                onClick={handleBackToDashboard}
+                onClick={() => { handleBackToDashboard(); setSidebarOpen(false) }}
               >
                 <LayoutDashboard size={22} />
                 Dashboard
               </button>
               <button
                 className={`sidebar-nav-item${activePage === 'settings' ? ' active' : ''}`}
-                onClick={() => setActivePage('settings')}
+                onClick={() => { setActivePage('settings'); setSidebarOpen(false) }}
               >
                 <SettingsIcon size={22} />
                 Settings
@@ -145,6 +147,15 @@ function App() {
       </aside>
 
       <main className="main-content">
+        <div className="mobile-header">
+          <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          <div className="mobile-header-logo">
+            <Bot size={20} />
+            <span>AI Chatbot</span>
+          </div>
+        </div>
         {activePage === 'dashboard' && <Dashboard onLogout={handleLogout} onOpenAgent={handleOpenAgent} />}
         {activePage === 'agent-detail' && selectedAgentId && (
           <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />

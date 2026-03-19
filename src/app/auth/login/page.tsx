@@ -46,6 +46,9 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
       alignItems: 'center',
       justifyContent: 'center',
       background: '#fafafa',
+      overflowY: 'auto',
+      boxSizing: 'border-box',
+      padding: '1rem 0',
     }}>
       <div style={{
         width: '100%',
