@@ -14,7 +14,7 @@ const inputStyle: React.CSSProperties = {
   transition: 'border-color 0.2s',
 }
 
-function Login({ onLogin, onSwitchToRegister }: { onLogin: (token: string) => void; onSwitchToRegister: () => void }) {
+function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (token: string) => void; onSwitchToRegister: () => void; onBackToLanding?: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -52,6 +52,33 @@ function Login({ onLogin, onSwitchToRegister }: { onLogin: (token: string) => vo
         maxWidth: '440px',
         padding: '0 1.5rem',
       }}>
+        {/* Back to landing */}
+        {onBackToLanding && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <button
+              onClick={onBackToLanding}
+              style={{
+                all: 'unset',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: '#6b7280',
+                padding: '0.375rem 0.625rem',
+                borderRadius: '6px',
+                transition: 'background 0.15s, color 0.15s',
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+              </svg>
+              Voltar
+            </button>
+          </div>
+        )}
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <div style={{
