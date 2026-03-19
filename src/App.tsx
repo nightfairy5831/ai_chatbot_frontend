@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity } from 'lucide-react'
 import './App.css'
+import LandingPage from './app/landing/page'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
 import Dashboard from './app/dashboard/page'
@@ -11,6 +12,7 @@ import Request from './lib/request'
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
+  const [showLanding, setShowLanding] = useState(true)
   const [authPage, setAuthPage] = useState<'login' | 'register'>('login')
   const [activePage, setActivePage] = useState<'dashboard' | 'agent-detail' | 'settings' | 'admin-dashboard' | 'admin-users' | 'admin-agents' | 'admin-logs'>('dashboard')
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null)
@@ -40,6 +42,7 @@ function App() {
     setToken(null)
     setUsername(null)
     setUserRole(null)
+    setShowLanding(true)
     setAuthPage('login')
     setActivePage('dashboard')
     setSelectedAgentId(null)
@@ -56,10 +59,13 @@ function App() {
   }
 
   if (!token) {
+    if (showLanding) {
+      return <LandingPage onGoToLogin={() => setShowLanding(false)} />
+    }
     if (authPage === 'register') {
       return <Register onRegister={handleAuth} onSwitchToLogin={() => setAuthPage('login')} />
     }
-    return <Login onLogin={handleAuth} onSwitchToRegister={() => setAuthPage('register')} />
+    return <Login onLogin={handleAuth} onSwitchToRegister={() => setAuthPage('register')} onBackToLanding={() => setShowLanding(true)} />
   }
 
   return (
