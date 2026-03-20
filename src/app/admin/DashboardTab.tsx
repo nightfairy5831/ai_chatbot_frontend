@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Bot, MessageSquare, UserCheck, Send, TrendingUp } from 'lucide-react'
+import { Users, Bot, MessageSquare, UserCheck, Send, TrendingUp, Coins } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import Request from '../../lib/request'
 
@@ -22,6 +22,18 @@ interface AdminAgent {
   owner_username: string
 }
 
+interface TokenByAgent {
+  agent_name: string
+  username: string
+  questions: number
+  total_token: number
+}
+
+interface TokenDaily {
+  date: string
+  total_token: number
+}
+
 export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId }: { onLogout: () => void; testAgentId?: number | null }) {
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [agents, setAgents] = useState<AdminAgent[]>([])
@@ -31,6 +43,9 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
   const [questionChart, setQuestionChart] = useState<ChartData[]>([])
   const [registrationChart, setRegistrationChart] = useState<ChartData[]>([])
   const [agentChart, setAgentChart] = useState<ChartData[]>([])
+
+  const [tokenByAgent, setTokenByAgent] = useState<TokenByAgent[]>([])
+  const [tokenDaily, setTokenDaily] = useState<TokenDaily[]>([])
 
   const [agentsLoading, setAgentsLoading] = useState(false)
   const [testAgentId, setTestAgentId] = useState<number | null>(null)
@@ -62,6 +77,17 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
     } catch {}
   }
 
+  const fetchTokenUsage = async () => {
+    try {
+      const [agents, daily] = await Promise.all([
+        Request.Get('/admin/token-usage/agents'),
+        Request.Get('/admin/token-usage/daily'),
+      ])
+      setTokenByAgent(agents)
+      setTokenDaily(daily)
+    } catch {}
+  }
+
   const fetchAgents = async () => {
     setAgentsLoading(true)
     try {
@@ -77,7 +103,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
   useEffect(() => {
     const load = async () => {
       setLoading(true)
-      await Promise.all([fetchStats(), fetchCharts()])
+      await Promise.all([fetchStats(), fetchCharts(), fetchTokenUsage()])
       setLoading(false)
     }
     load()
@@ -177,6 +203,57 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                   <Bar dataKey="count" fill="#4f6ef7" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Token Usage Table + Chart */}
+          <div className="admin-charts-grid">
+            <div className="admin-chart-card">
+              <h3 className="admin-section-title"><Coins size={18} /> Token Usage by Agent</h3>
+              <div style={{ overflowX: 'auto', maxHeight: '300px', overflowY: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Agent</th>
+                      <th>Owner</th>
+                      <th>Questions</th>
+                      <th>Tokens</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tokenByAgent.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8' }}>No token usage data yet.</td>
+                      </tr>
+                    ) : (
+                      tokenByAgent.map((row, i) => (
+                        <tr key={i}>
+                          <td>{row.agent_name}</td>
+                          <td>{row.username}</td>
+                          <td>{row.questions}</td>
+                          <td>{row.total_token.toLocaleString()}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="admin-chart-card">
+              <h3 className="admin-section-title"><Coins size={18} /> Daily Token Usage (Last 30 Days)</h3>
+              {tokenDaily.every(r => r.total_token === 0) ? (
+                <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No token usage data yet.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={tokenDaily}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip labelFormatter={(v) => v} formatter={(v: number) => [v.toLocaleString(), 'Tokens']} />
+                    <Bar dataKey="total_token" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
