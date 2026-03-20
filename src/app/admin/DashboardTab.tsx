@@ -249,7 +249,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip labelFormatter={(v) => v} formatter={(v: number) => [v.toLocaleString(), 'Tokens']} />
+                    <Tooltip labelFormatter={(v) => v} formatter={(v) => [Number(v).toLocaleString(), 'Tokens']} />
                     <Bar dataKey="total_token" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
