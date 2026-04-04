@@ -72,6 +72,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const [pName, setPName] = useState('')
   const [pDesc, setPDesc] = useState('')
   const [pPrice, setPPrice] = useState('')
+  const [pType, setPType] = useState('product')
+  const [pLink, setPLink] = useState('')
   const [pSaving, setPSaving] = useState(false)
   const [pError, setPError] = useState<string | null>(null)
 
@@ -227,6 +229,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     setPName('')
     setPDesc('')
     setPPrice('')
+    setPType('product')
+    setPLink('')
     setPError(null)
     setShowProductForm(true)
   }
@@ -236,6 +240,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     setPName(p.name)
     setPDesc(p.description || '')
     setPPrice(p.price || '')
+    setPType(p.type || 'product')
+    setPLink(p.purchase_link || '')
     setPError(null)
     setShowProductForm(true)
   }
@@ -246,6 +252,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     setPName('')
     setPDesc('')
     setPPrice('')
+    setPType('product')
+    setPLink('')
     setPError(null)
   }
 
@@ -255,7 +263,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     setPSaving(true)
     setPError(null)
     try {
-      const payload = { name: pName.trim(), description: pDesc.trim() || null, price: pPrice.trim() || null }
+      const payload = { name: pName.trim(), description: pDesc.trim() || null, price: pPrice.trim() || null, type: pType, purchase_link: pLink.trim() || null }
       if (editingProduct) {
         await Request.Patch(`/agents/${agentId}/products/${editingProduct.id}`, payload)
       } else {
@@ -418,6 +426,13 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             <form className="agent-form" onSubmit={saveProduct}>
               <h3>{editingProduct ? 'Edit Product' : 'Add Product'}</h3>
               <div className="form-group">
+                <label>Type</label>
+                <select className="form-input" value={pType} onChange={(e) => setPType(e.target.value)}>
+                  <option value="product">Product</option>
+                  <option value="service">Service</option>
+                </select>
+              </div>
+              <div className="form-group">
                 <label>Name</label>
                 <input className="form-input" value={pName} onChange={(e) => setPName(e.target.value)} placeholder="Product name" autoFocus />
               </div>
@@ -429,6 +444,12 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 <label>Price</label>
                 <input className="form-input" type="number" step="0.01" min="0" value={pPrice} onChange={(e) => setPPrice(e.target.value)} placeholder="29.99" />
               </div>
+              {pType === 'product' && (
+                <div className="form-group">
+                  <label>Purchase Link</label>
+                  <input className="form-input" value={pLink} onChange={(e) => setPLink(e.target.value)} placeholder="https://your-store.com/product" />
+                </div>
+              )}
               {pError && <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>{pError}</p>}
               <div className="form-actions">
                 <button className="btn-primary" type="submit" disabled={pSaving}>{pSaving ? 'Saving...' : editingProduct ? 'Update' : 'Add'}</button>
@@ -450,8 +471,18 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                     {p.price && <span className="product-card-price">${p.price}</span>}
                   </div>
                   <div className="product-card-col product-card-info">
-                    <p className="product-card-name">{p.name}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <p className="product-card-name" style={{ margin: 0 }}>{p.name}</p>
+                      <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 600, background: p.type === 'service' ? '#ede9fe' : '#e0f2fe', color: p.type === 'service' ? '#7c3aed' : '#0369a1' }}>
+                        {p.type === 'service' ? 'SERVICE' : 'PRODUCT'}
+                      </span>
+                    </div>
                     {p.description && <p className="product-card-desc">{p.description}</p>}
+                    {p.purchase_link && (
+                      <a href={p.purchase_link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#4f6ef7', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Link2 size={14} /> Purchase Link
+                      </a>
+                    )}
                   </div>
                   <div className="product-card-col product-card-actions">
                     <button className="btn-icon" title="Edit" onClick={() => openProductEdit(p)}><Pencil size={17} /></button>
