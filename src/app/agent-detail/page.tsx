@@ -85,6 +85,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const [bookings, setBookings] = useState<Booking[]>([])
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [selectedDate, setSelectedDate] = useState('')
+  const [calMonth, setCalMonth] = useState(new Date().getMonth())
+  const [calYear, setCalYear] = useState(new Date().getFullYear())
 
   const fetchCalendarConnection = async () => {
     try {
@@ -539,7 +541,12 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0 }}><Calendar size={18} /> Google Calendar</h3>
             {calendarConnected ? (
-              <button className="btn-secondary" onClick={disconnectCalendar}>Disconnect</button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="btn-secondary" onClick={() => { fetchBookings() }} disabled={calendarLoading}>
+                  {calendarLoading ? 'Loading...' : 'Refresh'}
+                </button>
+                <button className="btn-secondary" onClick={disconnectCalendar}>Disconnect</button>
+              </div>
             ) : (
               <button className="btn-primary" onClick={connectCalendar}>Connect Google Calendar</button>
             )}
@@ -551,53 +558,107 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', alignItems: 'flex-end' }}>
-                <div className="form-group" style={{ margin: 0, flex: 1 }}>
-                  <label>Check Availability</label>
-                  <input
-                    className="form-input"
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                  />
+              {/* Monthly Calendar */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <button className="btn-icon" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1) } else { setCalMonth(calMonth - 1) } }}>&lt;</button>
+                  <h4 style={{ margin: 0 }}>{new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                  <button className="btn-icon" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1) } else { setCalMonth(calMonth + 1) } }}>&gt;</button>
                 </div>
-                <button className="btn-primary" onClick={checkAvailability} disabled={!selectedDate}>Check</button>
-              </div>
-
-              {availableSlots.length > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ marginBottom: '0.5rem' }}>Available Slots</h4>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    {availableSlots.map((slot, i) => (
-                      <span key={i} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', color: '#16a34a' }}>
-                        {slot.start} - {slot.end}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h4 style={{ margin: 0 }}>Upcoming Bookings</h4>
-                <button className="btn-secondary" onClick={fetchBookings} disabled={calendarLoading}>
-                  {calendarLoading ? 'Loading...' : 'Refresh'}
-                </button>
-              </div>
-
-              {bookings.length === 0 ? (
-                <div className="empty-state"><p>No upcoming bookings.</p></div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {bookings.map((b) => (
-                    <div key={b.event_id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', background: '#f9fafb' }}>
-                      <p style={{ fontWeight: 600, margin: '0 0 0.25rem' }}>{b.summary}</p>
-                      <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
-                        {new Date(b.start).toLocaleString()} — {new Date(b.end).toLocaleString()}
-                      </p>
-                    </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center' }}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                    <div key={d} style={{ padding: '0.4rem', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{d}</div>
                   ))}
+                  {(() => {
+                    const firstDay = new Date(calYear, calMonth, 1).getDay()
+                    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+                    const today = new Date()
+                    const cells = []
+
+                    for (let i = 0; i < firstDay; i++) {
+                      cells.push(<div key={`empty-${i}`} />)
+                    }
+
+                    for (let day = 1; day <= daysInMonth; day++) {
+                      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                      const dayBookings = bookings.filter(b => b.start && b.start.startsWith(dateStr))
+                      const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day
+                      const isSelected = selectedDate === dateStr
+
+                      cells.push(
+                        <div
+                          key={day}
+                          onClick={() => { setSelectedDate(dateStr); checkAvailability() }}
+                          style={{
+                            padding: '0.35rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            background: isSelected ? '#4f6ef7' : isToday ? '#e0f2fe' : dayBookings.length > 0 ? '#f0fdf4' : 'transparent',
+                            color: isSelected ? '#fff' : '#1f2937',
+                            border: dayBookings.length > 0 ? '1px solid #bbf7d0' : '1px solid transparent',
+                            position: 'relative',
+                          }}
+                        >
+                          {day}
+                          {dayBookings.length > 0 && (
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', margin: '2px auto 0' }} />
+                          )}
+                        </div>
+                      )
+                    }
+
+                    return cells
+                  })()}
+                </div>
+              </div>
+
+              {/* Selected date availability */}
+              {selectedDate && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h4 style={{ margin: 0 }}>Availability — {selectedDate}</h4>
+                    <button className="btn-secondary" onClick={checkAvailability} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}>Check</button>
+                  </div>
+                  {availableSlots.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {availableSlots.map((slot, i) => (
+                        <span key={i} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', color: '#16a34a' }}>
+                          {slot.start} - {slot.end}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Click "Check" to see available slots.</p>
+                  )}
                 </div>
               )}
+
+              {/* Bookings for selected date or all upcoming */}
+              <div>
+                <h4 style={{ marginBottom: '0.5rem' }}>
+                  {selectedDate ? `Bookings — ${selectedDate}` : 'Upcoming Bookings'}
+                </h4>
+                {(() => {
+                  const filtered = selectedDate
+                    ? bookings.filter(b => b.start && b.start.startsWith(selectedDate))
+                    : bookings
+                  return filtered.length === 0 ? (
+                    <div className="empty-state"><p>No bookings{selectedDate ? ' on this date' : ''}.</p></div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {filtered.map((b) => (
+                        <div key={b.event_id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', background: '#f9fafb' }}>
+                          <p style={{ fontWeight: 600, margin: '0 0 0.25rem' }}>{b.summary}</p>
+                          <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                            {new Date(b.start).toLocaleString()} — {new Date(b.end).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+              </div>
             </>
           )}
         </div>
