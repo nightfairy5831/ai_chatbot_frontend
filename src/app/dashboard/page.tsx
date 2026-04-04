@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare } from 'lucide-react'
+import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare, Activity } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Agent {
@@ -17,6 +17,15 @@ interface Stats {
   recent_agent: { id: number; name: string } | null
 }
 
+interface ActivityLog {
+  id: number
+  question: string
+  agent_name: string
+  agent_id: number
+  source_channel: string
+  created_at: string | null
+}
+
 function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgent: (id: number) => void }) {
   const [agents, setAgents] = useState<Agent[]>([])
   const [stats, setStats] = useState<Stats>({ total_agents: 0, total_products: 0, total_questions: 0, most_used_agent: null, recent_agent: null })
@@ -28,6 +37,18 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
   const [formDescription, setFormDescription] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [logs, setLogs] = useState<ActivityLog[]>([])
+  const [logsLoading, setLogsLoading] = useState(false)
+  const [showLogs, setShowLogs] = useState(false)
+
+  const fetchLogs = async () => {
+    setLogsLoading(true)
+    try {
+      const data = await Request.Get('/agents/logs')
+      setLogs(data)
+    } catch { /* ignore */ }
+    finally { setLogsLoading(false) }
+  }
 
   const fetchData = async () => {
     try {
@@ -245,6 +266,50 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
           ))}
         </div>
       )}
+
+      {/* Activity Logs */}
+      <div style={{ marginTop: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={18} /> Recent Activity</h3>
+          <button className="btn-secondary" onClick={() => { setShowLogs(!showLogs); if (!showLogs && logs.length === 0) fetchLogs() }}>
+            {showLogs ? 'Hide' : 'Show'}
+          </button>
+        </div>
+        {showLogs && (
+          logsLoading ? (
+            <div className="loading-state"><div className="spinner" />Loading...</div>
+          ) : logs.length === 0 ? (
+            <div className="empty-state"><p>No activity yet.</p></div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Agent</th>
+                    <th>Question</th>
+                    <th>Channel</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.id}>
+                      <td>{log.agent_name}</td>
+                      <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.question}</td>
+                      <td>
+                        <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: log.source_channel === 'whatsapp' ? '#dcfce7' : '#e0f2fe', color: log.source_channel === 'whatsapp' ? '#16a34a' : '#0369a1' }}>
+                          {log.source_channel}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.85rem', color: '#6b7280' }}>{log.created_at ? new Date(log.created_at).toLocaleString() : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+      </div>
     </div>
   )
 }
