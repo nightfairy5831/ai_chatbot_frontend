@@ -12,14 +12,6 @@ interface Product {
   agent_id: number
 }
 
-interface CalendarConnectionType {
-  id: number
-  agent_id: number
-  user_id: number
-  calendar_id: string | null
-  is_active: boolean
-}
-
 interface Booking {
   event_id: string
   summary: string
