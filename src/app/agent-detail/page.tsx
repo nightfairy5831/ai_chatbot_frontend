@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2 } from 'lucide-react'
 import Request from '../../lib/request'
 
 interface Product {
@@ -7,7 +7,30 @@ interface Product {
   name: string
   description: string | null
   price: string | null
+  type: string
+  purchase_link: string | null
   agent_id: number
+}
+
+interface CalendarConnectionType {
+  id: number
+  agent_id: number
+  user_id: number
+  calendar_id: string | null
+  is_active: boolean
+}
+
+interface Booking {
+  event_id: string
+  summary: string
+  start: string
+  end: string
+  status: string
+}
+
+interface TimeSlot {
+  start: string
+  end: string
 }
 
 interface Agent {
@@ -29,7 +52,7 @@ const TONES = ['professional', 'friendly', 'casual', 'formal']
 function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: () => void; onLogout: () => void }) {
   const [agent, setAgent] = useState<Agent | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'config' | 'products' | 'prompt'>('config')
+  const [activeTab, setActiveTab] = useState<'config' | 'products' | 'prompt' | 'calendar'>('config')
 
   // Config form
   const [businessName, setBusinessName] = useState('')
@@ -62,6 +85,55 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const [chatLoading, setChatLoading] = useState(false)
   const [chatError, setChatError] = useState<string | null>(null)
 
+  // Calendar
+  const [calendarConnected, setCalendarConnected] = useState(false)
+  const [calendarLoading, setCalendarLoading] = useState(false)
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
+  const [selectedDate, setSelectedDate] = useState('')
+
+  const fetchCalendarConnection = async () => {
+    try {
+      const data = await Request.Get(`/calendar/agents/${agentId}/connection`)
+      setCalendarConnected(!!data)
+    } catch {
+      setCalendarConnected(false)
+    }
+  }
+
+  const connectCalendar = async () => {
+    try {
+      const data = await Request.Get(`/calendar/connect/${agentId}`)
+      window.open(data.auth_url, '_blank')
+    } catch { /* ignore */ }
+  }
+
+  const disconnectCalendar = async () => {
+    if (!confirm('Disconnect Google Calendar?')) return
+    try {
+      await Request.Delete(`/calendar/agents/${agentId}/disconnect`)
+      setCalendarConnected(false)
+      setBookings([])
+    } catch { /* ignore */ }
+  }
+
+  const fetchBookings = async () => {
+    setCalendarLoading(true)
+    try {
+      const data = await Request.Get(`/calendar/agents/${agentId}/bookings`)
+      setBookings(data)
+    } catch { /* ignore */ }
+    finally { setCalendarLoading(false) }
+  }
+
+  const checkAvailability = async () => {
+    if (!selectedDate) return
+    try {
+      const data = await Request.Post(`/calendar/agents/${agentId}/availability`, { date: selectedDate })
+      setAvailableSlots(data)
+    } catch { /* ignore */ }
+  }
+
   const fetchAgent = async () => {
     try {
       const data = await Request.Get(`/agents/${agentId}`)
@@ -89,6 +161,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   useEffect(() => {
     fetchAgent()
     fetchProducts()
+    fetchCalendarConnection()
   }, [agentId])
 
   // Config handlers
@@ -248,6 +321,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
         <button className={`tab${activeTab === 'config' ? ' active' : ''}`} onClick={() => setActiveTab('config')}>Configuration</button>
         <button className={`tab${activeTab === 'products' ? ' active' : ''}`} onClick={() => setActiveTab('products')}>Products</button>
         <button className={`tab${activeTab === 'prompt' ? ' active' : ''}`} onClick={() => setActiveTab('prompt')}>Prompt & Test</button>
+        <button className={`tab${activeTab === 'calendar' ? ' active' : ''}`} onClick={() => setActiveTab('calendar')}><Calendar size={16} /> Calendar</button>
       </div>
 
       {/* Configuration Tab */}
@@ -433,6 +507,76 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Calendar Tab */}
+      {activeTab === 'calendar' && (
+        <div className="tab-content">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0 }}><Calendar size={18} /> Google Calendar</h3>
+            {calendarConnected ? (
+              <button className="btn-secondary" onClick={disconnectCalendar}>Disconnect</button>
+            ) : (
+              <button className="btn-primary" onClick={connectCalendar}>Connect Google Calendar</button>
+            )}
+          </div>
+
+          {!calendarConnected ? (
+            <div className="empty-state">
+              <p>Connect your Google Calendar to let this agent book appointments.</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', alignItems: 'flex-end' }}>
+                <div className="form-group" style={{ margin: 0, flex: 1 }}>
+                  <label>Check Availability</label>
+                  <input
+                    className="form-input"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                  />
+                </div>
+                <button className="btn-primary" onClick={checkAvailability} disabled={!selectedDate}>Check</button>
+              </div>
+
+              {availableSlots.length > 0 && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ marginBottom: '0.5rem' }}>Available Slots</h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {availableSlots.map((slot, i) => (
+                      <span key={i} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', color: '#16a34a' }}>
+                        {slot.start} - {slot.end}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h4 style={{ margin: 0 }}>Upcoming Bookings</h4>
+                <button className="btn-secondary" onClick={fetchBookings} disabled={calendarLoading}>
+                  {calendarLoading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+
+              {bookings.length === 0 ? (
+                <div className="empty-state"><p>No upcoming bookings.</p></div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {bookings.map((b) => (
+                    <div key={b.event_id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', background: '#f9fafb' }}>
+                      <p style={{ fontWeight: 600, margin: '0 0 0.25rem' }}>{b.summary}</p>
+                      <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                        {new Date(b.start).toLocaleString()} — {new Date(b.end).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>
