@@ -75,9 +75,10 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
 
   // Chat test
   const [chatMessage, setChatMessage] = useState('')
-  const [chatResponse, setChatResponse] = useState<string | null>(null)
+  // chatResponse replaced by chatHistory
   const [chatLoading, setChatLoading] = useState(false)
   const [chatError, setChatError] = useState<string | null>(null)
+  const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([])
 
   // Calendar
   const [calendarConnected, setCalendarConnected] = useState(false)
@@ -297,14 +298,15 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     if (!chatMessage.trim()) return
     setChatLoading(true)
     setChatError(null)
-    setChatResponse(null)
+    const msg = chatMessage.trim()
     try {
-      const data = await Request.Post(`/agents/${agentId}/chat`, { message: chatMessage.trim() })
-      setChatResponse(data.response)
+      const data = await Request.Post(`/agents/${agentId}/chat`, { message: msg, history: chatHistory })
+      setChatHistory(prev => [...prev, { role: 'user', content: msg }, { role: 'assistant', content: data.response }])
     } catch (err: any) {
       setChatError(err.response?.data?.detail || 'Failed to get AI response')
     } finally {
       setChatLoading(false)
+      setChatMessage('')
     }
   }
 
@@ -523,13 +525,16 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
               </button>
             </div>
             <div className="chat-response-scroll">
-              {chatError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{chatError}</p>}
-              {chatResponse && (
-                <div className="chat-response">
-                  <p className="chat-response-label">AI Response:</p>
-                  <p className="chat-response-text">{chatResponse}</p>
+              {chatHistory.map((msg, i) => (
+                <div key={i} style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', borderRadius: '8px', background: msg.role === 'user' ? '#e0f2fe' : '#f0fdf4' }}>
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: msg.role === 'user' ? '#0369a1' : '#16a34a', margin: '0 0 0.25rem' }}>
+                    {msg.role === 'user' ? 'You' : 'AI'}
+                  </p>
+                  <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap' }}>{msg.content}</p>
                 </div>
-              )}
+              ))}
+              {chatError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{chatError}</p>}
+              {chatLoading && <p style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.5rem' }}>Thinking...</p>}
             </div>
           </div>
         </div>
