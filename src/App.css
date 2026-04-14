@@ -163,11 +163,13 @@
 .main-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2.5rem 3rem;
   background: #fafafa;
   color: #1f2937;
   text-align: left;
   position: relative;
+  min-width: 0;
 }
 
 .main-content > div {

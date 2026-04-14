@@ -113,65 +113,138 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
   }
 
   if (profileLoading) {
-    return <div className="loading-state"><div className="spinner" />Loading...</div>
+    return (
+      <div className="flex items-center justify-center gap-2.5 py-12 text-gray-400 text-sm">
+        <div className="w-5 h-5 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+        Loading...
+      </div>
+    )
   }
 
   return (
     <div>
-      <div className="dashboard-header">
-        <h2>Settings</h2>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="m-0 text-2xl font-bold text-gray-900 tracking-tight">Settings</h2>
       </div>
 
-      <div className="tabs">
-        <button className={`tab${activeTab === 'profile' ? ' active' : ''}`} onClick={() => setActiveTab('profile')}>Profile</button>
-        <button className={`tab${activeTab === 'api' ? ' active' : ''}`} onClick={() => setActiveTab('api')}>API Test</button>
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-gray-200 mb-6">
+        <button
+          className={`px-5 py-3 cursor-pointer text-base font-medium border-b-2 transition-colors bg-transparent outline-none ${
+            activeTab === 'profile'
+              ? 'text-blue-500 border-b-blue-500 font-semibold'
+              : 'text-gray-500 border-b-transparent hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Profile
+        </button>
+        <button
+          className={`px-5 py-3 cursor-pointer text-base font-medium border-b-2 transition-colors bg-transparent outline-none ${
+            activeTab === 'api'
+              ? 'text-blue-500 border-b-blue-500 font-semibold'
+              : 'text-gray-500 border-b-transparent hover:text-gray-700'
+          }`}
+          onClick={() => setActiveTab('api')}
+        >
+          API Test
+        </button>
       </div>
 
+      {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <div className="tab-content">
-          <form className="agent-form" onSubmit={handleProfileSave}>
-            <h3 className="settings-section-title"><User size={22} /> Profile</h3>
-            <div className="form-group">
-              <label>Username</label>
-              <input className="form-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your username" />
+        <div className="max-w-full overflow-y-auto max-h-[calc(100vh-5rem)]">
+          {/* Profile Form */}
+          <form className="bg-white border border-gray-200 rounded-xl p-5 mb-4" onSubmit={handleProfileSave}>
+            <h3 className="flex items-center gap-2.5 m-0 mb-4 text-xl font-bold text-gray-900 tracking-tight">
+              <User size={22} className="text-blue-500" /> Profile
+            </h3>
+            <div className="mb-3">
+              <label className="block text-[0.95rem] font-semibold text-gray-700 mb-1.5 tracking-wide">Username</label>
+              <input
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors focus:border-blue-500"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Your username"
+              />
             </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input className="form-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
+            <div className="mb-3">
+              <label className="block text-[0.95rem] font-semibold text-gray-700 mb-1.5 tracking-wide">Email</label>
+              <input
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors focus:border-blue-500"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+              />
             </div>
             {profileMsg && (
-              <p style={{ color: profileMsg.isError ? '#dc2626' : '#16a34a', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
+              <p className={`text-sm m-0 mb-2 ${profileMsg.isError ? 'text-red-600' : 'text-green-600'}`}>
                 {profileMsg.text}
               </p>
             )}
-            <div className="form-actions">
-              <button className="btn-primary" type="submit" disabled={profileSaving}>
+            <div className="flex gap-3 mt-3">
+              <button
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border-none bg-blue-500 text-white text-[0.95rem] font-semibold cursor-pointer transition-colors hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={profileSaving}
+              >
                 <Save size={18} /> {profileSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
 
-          <form className="agent-form" onSubmit={handlePasswordChange}>
-            <h3 className="settings-section-title"><Lock size={22} /> Change Password</h3>
-            <div className="form-group">
-              <label>Current Password</label>
-              <input className="form-input" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" required />
+          {/* Change Password Form */}
+          <form className="bg-white border border-gray-200 rounded-xl p-5 mb-4" onSubmit={handlePasswordChange}>
+            <h3 className="flex items-center gap-2.5 m-0 mb-4 text-xl font-bold text-gray-900 tracking-tight">
+              <Lock size={22} className="text-blue-500" /> Change Password
+            </h3>
+            <div className="mb-3">
+              <label className="block text-[0.95rem] font-semibold text-gray-700 mb-1.5 tracking-wide">Current Password</label>
+              <input
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors focus:border-blue-500"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                required
+              />
             </div>
-            <div className="form-group">
-              <label>New Password</label>
-              <input className="form-input" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" required />
+            <div className="mb-3">
+              <label className="block text-[0.95rem] font-semibold text-gray-700 mb-1.5 tracking-wide">New Password</label>
+              <input
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors focus:border-blue-500"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                required
+              />
             </div>
-            <div className="form-group">
-              <label>Confirm New Password</label>
-              <input className="form-input" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" required />
+            <div className="mb-3">
+              <label className="block text-[0.95rem] font-semibold text-gray-700 mb-1.5 tracking-wide">Confirm New Password</label>
+              <input
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors focus:border-blue-500"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                required
+              />
             </div>
             {passwordMsg && (
-              <p style={{ color: passwordMsg.isError ? '#dc2626' : '#16a34a', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
+              <p className={`text-sm m-0 mb-2 ${passwordMsg.isError ? 'text-red-600' : 'text-green-600'}`}>
                 {passwordMsg.text}
               </p>
             )}
-            <div className="form-actions">
-              <button className="btn-primary" type="submit" disabled={passwordSaving}>
+            <div className="flex gap-3 mt-3">
+              <button
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border-none bg-blue-500 text-white text-[0.95rem] font-semibold cursor-pointer transition-colors hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={passwordSaving}
+              >
                 <Lock size={18} /> {passwordSaving ? 'Changing...' : 'Change Password'}
               </button>
             </div>
@@ -179,30 +252,39 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
         </div>
       )}
 
+      {/* API Test Tab */}
       {activeTab === 'api' && (
-        <div className="tab-content">
-          <div className="agent-form">
-            <h3 className="settings-section-title"><Activity size={22} /> API Health Check</h3>
-            <div className="form-actions" style={{ marginTop: 0 }}>
-              <button className="btn-primary" type="button" onClick={handleHealthCheck} disabled={healthLoading}>
+        <div className="max-w-full overflow-y-auto max-h-[calc(100vh-5rem)]">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
+            <h3 className="flex items-center gap-2.5 m-0 mb-4 text-xl font-bold text-gray-900 tracking-tight">
+              <Activity size={22} className="text-blue-500" /> API Health Check
+            </h3>
+            <div className="flex gap-3">
+              <button
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg border-none bg-blue-500 text-white text-[0.95rem] font-semibold cursor-pointer transition-colors hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                type="button"
+                onClick={handleHealthCheck}
+                disabled={healthLoading}
+              >
                 <Activity size={18} /> {healthLoading ? 'Checking...' : 'Run Health Check'}
               </button>
             </div>
 
             {healthLoading && (
-              <div className="loading-state" style={{ padding: '1.5rem 1rem' }}>
-                <div className="spinner" />Checking API status...
+              <div className="flex items-center justify-center gap-2.5 py-6 text-gray-400 text-sm">
+                <div className="w-5 h-5 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                Checking API status...
               </div>
             )}
 
             {healthError && (
-              <div className="health-result health-error">
+              <div className="flex items-center gap-2 mt-4 p-3 rounded-lg text-base bg-red-50 border border-red-200 text-red-600">
                 <AlertCircle size={16} /> {healthError}
               </div>
             )}
 
             {healthResponse && (
-              <div className="health-result health-success">
+              <div className="flex items-center gap-2 mt-4 p-3 rounded-lg text-base bg-green-50 border border-green-200 text-green-600">
                 <CheckCircle size={16} /> API is healthy: {JSON.stringify(healthResponse)}
               </div>
             )}

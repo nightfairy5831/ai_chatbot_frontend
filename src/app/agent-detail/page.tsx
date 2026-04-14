@@ -544,10 +544,10 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       {/* Calendar Tab */}
       {activeTab === 'calendar' && (
         <div className="tab-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div className="calendar-header">
             <h3 style={{ margin: 0 }}><Calendar size={18} /> Google Calendar</h3>
             {calendarConnected ? (
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="calendar-actions">
                 <button className="btn-secondary" onClick={() => { fetchBookings() }} disabled={calendarLoading}>
                   {calendarLoading ? 'Loading...' : 'Refresh'}
                 </button>
@@ -564,87 +564,60 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             </div>
           ) : (
             <>
-              {/* Monthly Calendar */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div className="cal-month">
+                <div className="cal-month-nav">
                   <button className="btn-icon" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1) } else { setCalMonth(calMonth - 1) } }}>&lt;</button>
-                  <h4 style={{ margin: 0 }}>{new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                  <h4>{new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
                   <button className="btn-icon" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1) } else { setCalMonth(calMonth + 1) } }}>&gt;</button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center' }}>
+                <div className="cal-grid">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                    <div key={d} style={{ padding: '0.4rem', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{d}</div>
+                    <div key={d} className="cal-day-label">{d}</div>
                   ))}
                   {(() => {
                     const firstDay = new Date(calYear, calMonth, 1).getDay()
                     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
                     const today = new Date()
                     const cells = []
-
-                    for (let i = 0; i < firstDay; i++) {
-                      cells.push(<div key={`empty-${i}`} />)
-                    }
-
+                    for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`} />)
                     for (let day = 1; day <= daysInMonth; day++) {
                       const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                       const dayBookings = bookings.filter(b => b.start && b.start.startsWith(dateStr))
                       const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day
                       const isSelected = selectedDate === dateStr
-
+                      const cls = `cal-day${isSelected ? ' selected' : ''}${isToday ? ' today' : ''}${dayBookings.length > 0 ? ' has-booking' : ''}`
                       cells.push(
-                        <div
-                          key={day}
-                          onClick={() => { setSelectedDate(dateStr); checkAvailability(dateStr) }}
-                          style={{
-                            padding: '0.35rem',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            background: isSelected ? '#4f6ef7' : isToday ? '#e0f2fe' : dayBookings.length > 0 ? '#f0fdf4' : 'transparent',
-                            color: isSelected ? '#fff' : '#1f2937',
-                            border: dayBookings.length > 0 ? '1px solid #bbf7d0' : '1px solid transparent',
-                            position: 'relative',
-                          }}
-                        >
+                        <div key={day} className={cls} onClick={() => { setSelectedDate(dateStr); checkAvailability(dateStr) }}>
                           {day}
-                          {dayBookings.length > 0 && (
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', margin: '2px auto 0' }} />
-                          )}
+                          {dayBookings.length > 0 && <span className="cal-dot" />}
                         </div>
                       )
                     }
-
                     return cells
                   })()}
                 </div>
               </div>
 
-              {/* Selected date availability */}
               {selectedDate && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h4 style={{ margin: 0 }}>Availability — {selectedDate}</h4>
-                    <button className="btn-secondary" onClick={() => checkAvailability()} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}>Check</button>
+                <div className="cal-availability">
+                  <div className="cal-availability-header">
+                    <h4>Availability — {selectedDate}</h4>
+                    <button className="btn-secondary btn-sm" onClick={() => checkAvailability()}>Check</button>
                   </div>
                   {availableSlots.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div className="cal-slots">
                       {availableSlots.map((slot, i) => (
-                        <span key={i} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', color: '#16a34a' }}>
-                          {slot.start} - {slot.end}
-                        </span>
+                        <span key={i} className="cal-slot">{slot.start} - {slot.end}</span>
                       ))}
                     </div>
                   ) : (
-                    <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Click "Check" to see available slots.</p>
+                    <p className="text-muted">Click "Check" to see available slots.</p>
                   )}
                 </div>
               )}
 
-              {/* Bookings for selected date or all upcoming */}
-              <div>
-                <h4 style={{ marginBottom: '0.5rem' }}>
-                  {selectedDate ? `Bookings — ${selectedDate}` : 'Upcoming Bookings'}
-                </h4>
+              <div className="cal-bookings">
+                <h4>{selectedDate ? `Bookings — ${selectedDate}` : 'Upcoming Bookings'}</h4>
                 {(() => {
                   const filtered = selectedDate
                     ? bookings.filter(b => b.start && b.start.startsWith(selectedDate))
@@ -652,11 +625,11 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                   return filtered.length === 0 ? (
                     <div className="empty-state"><p>No bookings{selectedDate ? ' on this date' : ''}.</p></div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className="cal-booking-list">
                       {filtered.map((b) => (
-                        <div key={b.event_id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', background: '#f9fafb' }}>
-                          <p style={{ fontWeight: 600, margin: '0 0 0.25rem' }}>{b.summary}</p>
-                          <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>
+                        <div key={b.event_id} className="cal-booking-card">
+                          <p className="cal-booking-title">{b.summary}</p>
+                          <p className="cal-booking-time">
                             {new Date(b.start).toLocaleString()} — {new Date(b.end).toLocaleString()}
                           </p>
                         </div>

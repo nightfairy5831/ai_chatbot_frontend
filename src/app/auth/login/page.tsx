@@ -1,19 +1,6 @@
 import { useState } from 'react'
 import Request from '../../../lib/request'
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.875rem 1rem',
-  borderRadius: '24px',
-  border: '1px solid #e5e7eb',
-  fontSize: '0.95rem',
-  outline: 'none',
-  boxSizing: 'border-box',
-  color: '#1f2937',
-  background: '#fff',
-  transition: 'border-color 0.2s',
-}
-
 function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (token: string) => void; onSwitchToRegister: () => void; onBackToLanding?: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,43 +23,14 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#fafafa',
-      overflowY: 'auto',
-      boxSizing: 'border-box',
-      padding: '1rem 0',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '440px',
-        padding: '0 1.5rem',
-      }}>
+    <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-[#fafafa] overflow-y-auto box-border py-4">
+      <div className="w-full max-w-[440px] px-6">
         {/* Back to landing */}
         {onBackToLanding && (
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="mb-6">
             <button
               onClick={onBackToLanding}
-              style={{
-                all: 'unset',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                color: '#6b7280',
-                padding: '0.375rem 0.625rem',
-                borderRadius: '6px',
-                transition: 'background 0.15s, color 0.15s',
-              }}
+              className="appearance-none bg-transparent border-none inline-flex items-center gap-1.5 cursor-pointer text-sm font-medium text-gray-500 py-1.5 px-2.5 rounded-md transition-all duration-150 hover:bg-gray-100 hover:text-gray-700"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
@@ -83,60 +41,27 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
           </div>
         )}
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            color: '#1a1a2e',
-            letterSpacing: '-0.02em',
-          }}>
-            <span style={{ fontSize: '1.75rem' }}>🤖</span>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 text-2xl font-bold text-[#1a1a2e] tracking-tight">
+            <span className="text-3xl">🤖</span>
             <span>AI Chatbot</span>
           </div>
         </div>
 
         {/* Heading */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{
-            margin: 0,
-            fontSize: '2.25rem',
-            fontWeight: 800,
-            color: '#111827',
-            lineHeight: 1.2,
-          }}>
+        <div className="text-center mb-8">
+          <h1 className="m-0 text-4xl font-extrabold text-gray-900 leading-tight">
             Welcome Back
           </h1>
-          <p style={{
-            margin: '0.75rem 0 0',
-            fontSize: '1.1rem',
-            color: '#6b7280',
-          }}>
-            Build Amazing <span style={{ color: '#4f6ef7' }}>AI Agent</span><span style={{ color: '#a855f6' }}>s</span>
+          <p className="mt-3 text-lg text-gray-500">
+            Build Amazing <span className="text-[#4f6ef7]">AI Agent</span><span className="text-purple-500">s</span>
           </p>
         </div>
 
         {/* Google Sign In */}
         <button
           type="button"
-          style={{
-            width: '100%',
-            padding: '0.875rem',
-            borderRadius: '24px',
-            border: '1px solid #e5e7eb',
-            background: '#fff',
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.75rem',
-            color: '#374151',
-            transition: 'background 0.2s',
-          }}
+          className="w-full py-3.5 rounded-3xl border border-gray-200 bg-white text-[0.95rem] font-medium cursor-pointer flex items-center justify-center gap-3 text-gray-700 transition-colors duration-200 hover:bg-gray-50"
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -148,43 +73,36 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
         </button>
 
         {/* Divider */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          margin: '1.5rem 0',
-        }}>
-          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-          <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Or</span>
-          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+        <div className="flex items-center gap-4 my-6">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-gray-400 text-sm">Or</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
+          <div className="mb-4">
             <input
-              className="auth-input"
+              className="w-full py-3.5 px-4 rounded-3xl border border-gray-200 text-[0.95rem] outline-none box-border text-gray-800 bg-white transition-colors duration-200 focus:border-[#4f6ef7]"
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
+          <div className="mb-6 relative">
             <input
-              className="auth-input"
+              className="w-full py-3.5 px-4 pr-12 rounded-3xl border border-gray-200 text-[0.95rem] outline-none box-border text-gray-800 bg-white transition-colors duration-200 focus:border-[#4f6ef7]"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ ...inputStyle, paddingRight: '3rem' }}
             />
             <button
-              className="password-toggle"
+              className="appearance-none bg-transparent border-none absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer flex items-center p-0 outline-none focus:outline-none"
               type="button"
               onClick={() => setShowPassword(!showPassword)}
             >
@@ -203,15 +121,7 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
           </div>
 
           {error && (
-            <div style={{
-              marginBottom: '1rem',
-              padding: '0.75rem 1rem',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '12px',
-              color: '#dc2626',
-              fontSize: '0.875rem',
-            }}>
+            <div className="mb-4 py-3 px-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -219,40 +129,28 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.875rem',
-              borderRadius: '24px',
-              border: 'none',
-              background: loading ? '#93a3f8' : '#4f6ef7',
-              color: '#fff',
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background 0.2s',
-            }}
+            className={`w-full py-3.5 rounded-3xl border-none text-white text-base font-semibold transition-colors duration-200 ${
+              loading
+                ? 'bg-[#93a3f8] cursor-not-allowed'
+                : 'bg-[#4f6ef7] cursor-pointer hover:bg-[#3b5de7]'
+            }`}
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
         {/* Forgot Password & Sign Up */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem' }}>
-          <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+        <div className="flex justify-between items-center mt-5">
+          <span className="text-gray-500 text-sm">
             Don't have an account?{' '}
             <span
               onClick={onSwitchToRegister}
-              style={{ color: '#4f6ef7', fontWeight: 600, cursor: 'pointer' }}
+              className="text-[#4f6ef7] font-semibold cursor-pointer"
             >
               Sign Up
             </span>
           </span>
-          <span style={{
-            color: '#111827',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}>
+          <span className="text-gray-900 text-sm font-semibold cursor-pointer">
             Forgot Password?
           </span>
         </div>

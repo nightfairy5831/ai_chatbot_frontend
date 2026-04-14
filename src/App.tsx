@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity, Menu, X } from 'lucide-react'
-import './App.css'
 import LandingPage from './app/landing/page'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
@@ -60,117 +59,97 @@ function App() {
   }
 
   if (!token) {
-    if (showLanding) {
-      return <LandingPage onGoToLogin={() => setShowLanding(false)} />
-    }
-    if (authPage === 'register') {
-      return <Register onRegister={handleAuth} onSwitchToLogin={() => setAuthPage('login')} />
-    }
+    if (showLanding) return <LandingPage onGoToLogin={() => setShowLanding(false)} />
+    if (authPage === 'register') return <Register onRegister={handleAuth} onSwitchToLogin={() => setAuthPage('login')} />
     return <Login onLogin={handleAuth} onSwitchToRegister={() => setAuthPage('register')} onBackToLanding={() => setShowLanding(true)} />
   }
 
   return (
-    <div className="app-layout">
-      <div className={`sidebar-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
-      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
-        <div className="sidebar-logo">
-          <Bot size={26} />
-          <span>AI Chatbot</span>
+    <div className="flex min-h-screen">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed md:sticky top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
+          <Bot size={26} className="text-blue-500" />
+          <span className="text-lg font-semibold text-gray-800">AI Chatbot</span>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {userRole === 'admin' ? (
             <>
-              <button
-                className={`sidebar-nav-item${activePage === 'admin-dashboard' ? ' active' : ''}`}
-                onClick={() => { setActivePage('admin-dashboard'); setSidebarOpen(false) }}
-              >
-                <LayoutDashboard size={22} />
-                Dashboard
-              </button>
-              <button
-                className={`sidebar-nav-item${activePage === 'admin-users' ? ' active' : ''}`}
-                onClick={() => { setActivePage('admin-users'); setSidebarOpen(false) }}
-              >
-                <Users size={22} />
-                Users
-              </button>
-              <button
-                className={`sidebar-nav-item${activePage === 'admin-agents' ? ' active' : ''}`}
-                onClick={() => { setActivePage('admin-agents'); setSidebarOpen(false) }}
-              >
-                <Bot size={22} />
-                Agents
-              </button>
-              <button
-                className={`sidebar-nav-item${activePage === 'admin-logs' ? ' active' : ''}`}
-                onClick={() => { setActivePage('admin-logs'); setSidebarOpen(false) }}
-              >
-                <Activity size={22} />
-                Activity Logs
-              </button>
+              <NavItem active={activePage === 'admin-dashboard'} icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => { setActivePage('admin-dashboard'); setSidebarOpen(false) }} />
+              <NavItem active={activePage === 'admin-users'} icon={<Users size={20} />} label="Users" onClick={() => { setActivePage('admin-users'); setSidebarOpen(false) }} />
+              <NavItem active={activePage === 'admin-agents'} icon={<Bot size={20} />} label="Agents" onClick={() => { setActivePage('admin-agents'); setSidebarOpen(false) }} />
+              <NavItem active={activePage === 'admin-logs'} icon={<Activity size={20} />} label="Activity Logs" onClick={() => { setActivePage('admin-logs'); setSidebarOpen(false) }} />
             </>
           ) : (
             <>
-              <button
-                className={`sidebar-nav-item${activePage === 'dashboard' || activePage === 'agent-detail' ? ' active' : ''}`}
-                onClick={() => { handleBackToDashboard(); setSidebarOpen(false) }}
-              >
-                <LayoutDashboard size={22} />
-                Dashboard
-              </button>
-              <button
-                className={`sidebar-nav-item${activePage === 'settings' ? ' active' : ''}`}
-                onClick={() => { setActivePage('settings'); setSidebarOpen(false) }}
-              >
-                <SettingsIcon size={22} />
-                Settings
-              </button>
+              <NavItem active={activePage === 'dashboard' || activePage === 'agent-detail'} icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => { handleBackToDashboard(); setSidebarOpen(false) }} />
+              <NavItem active={activePage === 'settings'} icon={<SettingsIcon size={20} />} label="Settings" onClick={() => { setActivePage('settings'); setSidebarOpen(false) }} />
             </>
           )}
         </nav>
 
-        <div className="sidebar-bottom">
+        <div className="px-4 py-4 border-t border-gray-100">
           {username && (
-            <div className="sidebar-user">
-              <div className="sidebar-user-avatar">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-semibold">
                 {username[0].toUpperCase()}
               </div>
-              <span className="sidebar-user-email">{username}</span>
+              <span className="text-sm text-gray-600 truncate">{username}</span>
             </div>
           )}
-          <button className="sidebar-logout" onClick={handleLogout}>
-            <LogOut size={22} />
+          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors w-full px-2 py-1.5 rounded-lg hover:bg-red-50">
+            <LogOut size={18} />
             Logout
           </button>
         </div>
       </aside>
 
-      <main className="main-content">
-        <div className="mobile-header">
-          <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      {/* Main content */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 text-gray-800 min-w-0">
+        {/* Mobile header */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 md:hidden">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100">
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <div className="mobile-header-logo">
-            <Bot size={20} />
-            <span>AI Chatbot</span>
-          </div>
+          <Bot size={20} className="text-blue-500" />
+          <span className="font-semibold text-gray-800">AI Chatbot</span>
         </div>
-        {activePage === 'dashboard' && <Dashboard onLogout={handleLogout} onOpenAgent={handleOpenAgent} />}
-        {activePage === 'agent-detail' && selectedAgentId && (
-          <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />
-        )}
-        {activePage.startsWith('admin-') && (
-          <Admin
-            onLogout={handleLogout}
-            activeTab={activePage.replace('admin-', '') as 'dashboard' | 'users' | 'agents' | 'logs'}
-            testAgentId={testAgentId}
-            onTestAgent={(agentId) => { setTestAgentId(agentId); setActivePage('admin-dashboard') }}
-          />
-        )}
-        {activePage === 'settings' && <Settings onLogout={handleLogout} onUsernameChange={setUsername} />}
+
+        <div className="p-4 md:p-8 lg:p-10">
+          {activePage === 'dashboard' && <Dashboard onLogout={handleLogout} onOpenAgent={handleOpenAgent} />}
+          {activePage === 'agent-detail' && selectedAgentId && (
+            <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />
+          )}
+          {activePage.startsWith('admin-') && (
+            <Admin
+              onLogout={handleLogout}
+              activeTab={activePage.replace('admin-', '') as 'dashboard' | 'users' | 'agents' | 'logs'}
+              testAgentId={testAgentId}
+              onTestAgent={(agentId) => { setTestAgentId(agentId); setActivePage('admin-dashboard') }}
+            />
+          )}
+          {activePage === 'settings' && <Settings onLogout={handleLogout} onUsernameChange={setUsername} />}
+        </div>
       </main>
     </div>
+  )
+}
+
+function NavItem({ active, icon, label, onClick }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${active ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}`}
+    >
+      {icon}
+      {label}
+    </button>
   )
 }
 

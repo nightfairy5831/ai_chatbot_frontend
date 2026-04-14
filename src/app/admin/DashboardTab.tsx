@@ -130,58 +130,71 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
     }
   }
 
-  if (loading) return <div className="loading-state"><div className="spinner" />Loading...</div>
-  if (error && !stats) return <div className="empty-state"><p style={{ color: '#dc2626' }}>{error}</p></div>
+  if (loading) return (
+    <div className="flex items-center justify-center gap-3 h-[calc(100vh-5rem)] text-gray-500 text-sm">
+      <div className="w-5 h-5 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+      Loading...
+    </div>
+  )
+
+  if (error && !stats) return (
+    <div className="text-center py-12 px-4 text-gray-400 text-sm leading-relaxed">
+      <p className="text-red-600">{error}</p>
+    </div>
+  )
 
   return (
     <div>
-      {error && <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
       {stats && (
         <div>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-card-icon" style={{ background: 'rgba(79, 110, 247, 0.1)', color: '#4f6ef7' }}>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-4 max-[900px]:grid-cols-2 max-[500px]:grid-cols-1 gap-4 max-md:gap-3 mb-6">
+            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500">
                 <Users size={26} />
               </div>
-              <div className="stat-card-info">
-                <span className="stat-card-value">{stats.total_users}</span>
-                <span className="stat-card-label">Total Users</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_users}</span>
+                <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Users</span>
               </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-card-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-500">
                 <UserCheck size={26} />
               </div>
-              <div className="stat-card-info">
-                <span className="stat-card-value">{stats.active_users}</span>
-                <span className="stat-card-label">Active Users</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.active_users}</span>
+                <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Active Users</span>
               </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-card-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
+            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-amber-500/10 text-amber-500">
                 <Bot size={26} />
               </div>
-              <div className="stat-card-info">
-                <span className="stat-card-value">{stats.total_agents}</span>
-                <span className="stat-card-label">Total Agents</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_agents}</span>
+                <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Agents</span>
               </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-card-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-500">
                 <MessageSquare size={26} />
               </div>
-              <div className="stat-card-info">
-                <span className="stat-card-value">{stats.total_questions}</span>
-                <span className="stat-card-label">Total Questions</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_questions}</span>
+                <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Questions</span>
               </div>
             </div>
           </div>
 
           {/* Charts */}
-          <div className="admin-charts-grid">
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><Bot size={18} /> Agents Created (Last 30 Days)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <Bot size={18} /> Agents Created (Last 30 Days)
+              </h3>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={agentChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -192,8 +205,10 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><Users size={18} /> User Registrations (Last 30 Days)</h3>
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <Users size={18} /> User Registrations (Last 30 Days)
+              </h3>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={registrationChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -207,31 +222,33 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
           </div>
 
           {/* Token Usage Table + Chart */}
-          <div className="admin-charts-grid">
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><Coins size={18} /> Token Usage by Agent</h3>
-              <div style={{ overflowX: 'auto', maxHeight: '300px', overflowY: 'auto' }}>
-                <table className="admin-table">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <Coins size={18} /> Token Usage by Agent
+              </h3>
+              <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                <table className="w-full border-collapse text-[0.95rem] max-[480px]:min-w-[500px] max-[480px]:text-[0.85rem]">
                   <thead>
                     <tr>
-                      <th>Agent</th>
-                      <th>Owner</th>
-                      <th>Questions</th>
-                      <th>Tokens</th>
+                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Agent</th>
+                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Owner</th>
+                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Questions</th>
+                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Tokens</th>
                     </tr>
                   </thead>
                   <tbody>
                     {tokenByAgent.length === 0 ? (
                       <tr>
-                        <td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8' }}>No token usage data yet.</td>
+                        <td colSpan={4} className="text-center text-slate-400">No token usage data yet.</td>
                       </tr>
                     ) : (
                       tokenByAgent.map((row, i) => (
-                        <tr key={i}>
-                          <td>{row.agent_name}</td>
-                          <td>{row.username}</td>
-                          <td>{row.questions}</td>
-                          <td>{row.total_token.toLocaleString()}</td>
+                        <tr key={i} className="hover:[&>td]:bg-[#fafafa]">
+                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.agent_name}</td>
+                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.username}</td>
+                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.questions}</td>
+                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.total_token.toLocaleString()}</td>
                         </tr>
                       ))
                     )}
@@ -239,10 +256,12 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                 </table>
               </div>
             </div>
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><Coins size={18} /> Daily Token Usage (Last 30 Days)</h3>
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <Coins size={18} /> Daily Token Usage (Last 30 Days)
+              </h3>
               {tokenDaily.every(r => r.total_token === 0) ? (
-                <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No token usage data yet.</p>
+                <p className="text-slate-400 text-sm">No token usage data yet.</p>
               ) : (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={tokenDaily}>
@@ -258,9 +277,11 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
           </div>
 
           {/* Questions Chart + Live Test Panel */}
-          <div className="admin-charts-grid">
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><MessageSquare size={18} /> Questions (Last 30 Days)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <MessageSquare size={18} /> Questions (Last 30 Days)
+              </h3>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={questionChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -271,13 +292,14 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="admin-chart-card">
-              <h3 className="admin-section-title"><TrendingUp size={18} /> Live Agent Test</h3>
-              <div className="admin-test-panel">
-                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
+              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
+                <TrendingUp size={18} /> Live Agent Test
+              </h3>
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                <div className="flex gap-3 mb-3">
                   <select
-                    className="form-input"
-                    style={{ flex: 1 }}
+                    className="flex-1 w-full py-2.5 px-4 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors duration-150 focus:border-blue-500"
                     value={testAgentId ?? ''}
                     onChange={(e) => setTestAgentId(e.target.value ? Number(e.target.value) : null)}
                   >
@@ -289,18 +311,18 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                   </select>
                   {agents.length === 0 && (
                     <button
-                      style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                      className="bg-emerald-500 text-white border-none rounded-lg px-4 py-2 cursor-pointer inline-flex items-center gap-1.5 hover:bg-emerald-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                       onClick={() => fetchAgents()}
                       type="button"
                       disabled={agentsLoading}
                     >
-                      {agentsLoading ? <div className="spinner" style={{ width: 16, height: 16 }} /> : 'Load'}
+                      {agentsLoading ? <div className="w-4 h-4 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : 'Load'}
                     </button>
                   )}
                 </div>
-                <div className="chat-input-row">
+                <div className="flex gap-3 shrink-0 max-md:flex-col max-md:gap-2">
                   <input
-                    className="form-input"
+                    className="flex-1 w-full py-2.5 px-4 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors duration-150 focus:border-blue-500"
                     placeholder="Type a test message..."
                     value={testMessage}
                     onChange={(e) => setTestMessage(e.target.value)}
@@ -308,17 +330,17 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
                     disabled={!testAgentId}
                   />
                   <button
-                    className="btn-primary"
+                    className="inline-flex items-center gap-1.5 py-2.5 px-5 rounded-lg border-none bg-blue-500 text-white text-[0.95rem] font-semibold cursor-pointer transition-colors duration-150 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
                     onClick={handleTestChat}
                     disabled={testLoading || !testAgentId || !testMessage.trim()}
                   >
-                    {testLoading ? <div className="spinner" style={{ width: 16, height: 16 }} /> : <Send size={16} />}
+                    {testLoading ? <div className="w-4 h-4 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : <Send size={16} />}
                   </button>
                 </div>
                 {testResponse && (
-                  <div className="chat-response" style={{ marginTop: '0.75rem', maxHeight: '150px', overflowY: 'auto' }}>
-                    <p className="chat-response-label">AI Response</p>
-                    <p className="chat-response-text">{testResponse}</p>
+                  <div className="mt-3 max-h-[150px] overflow-y-auto bg-green-50 border border-green-200 rounded-[10px] p-4">
+                    <p className="text-xs font-semibold text-green-600 m-0 mb-2 uppercase tracking-wider">AI Response</p>
+                    <p className="text-[0.9rem] text-gray-800 m-0 leading-relaxed whitespace-pre-wrap">{testResponse}</p>
                   </div>
                 )}
               </div>
