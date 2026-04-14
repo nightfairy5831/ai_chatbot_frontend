@@ -123,10 +123,11 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     finally { setCalendarLoading(false) }
   }
 
-  const checkAvailability = async () => {
-    if (!selectedDate) return
+  const checkAvailability = async (dateOverride?: string) => {
+    const date = dateOverride || selectedDate
+    if (!date) return
     try {
-      const data = await Request.Post(`/calendar/agents/${agentId}/availability`, { date: selectedDate })
+      const data = await Request.Post(`/calendar/agents/${agentId}/availability`, { date })
       setAvailableSlots(data)
     } catch { /* ignore */ }
   }
@@ -593,7 +594,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                       cells.push(
                         <div
                           key={day}
-                          onClick={() => { setSelectedDate(dateStr); checkAvailability() }}
+                          onClick={() => { setSelectedDate(dateStr); checkAvailability(dateStr) }}
                           style={{
                             padding: '0.35rem',
                             borderRadius: '6px',
@@ -623,7 +624,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                     <h4 style={{ margin: 0 }}>Availability — {selectedDate}</h4>
-                    <button className="btn-secondary" onClick={checkAvailability} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}>Check</button>
+                    <button className="btn-secondary" onClick={() => checkAvailability()} style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}>Check</button>
                   </div>
                   {availableSlots.length > 0 ? (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
