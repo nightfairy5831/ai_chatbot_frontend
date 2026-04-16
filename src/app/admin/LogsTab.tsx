@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Search, X, Filter } from 'lucide-react'
 import Request from '../../lib/request'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 
 interface ActivityLog {
   id: number
@@ -59,100 +64,114 @@ export default function LogsTab({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div>
-      <div className="admin-filter-card" onKeyDown={(e) => e.key === 'Enter' && handleSearch()}>
-        <div className="admin-filter-header">
-          <div className="admin-filter-title">
-            <Filter size={14} />
-            <span>Filters</span>
+      {/* Filter Card */}
+      <Card
+        className="mb-4"
+        onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
+      >
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <Filter size={14} />
+              <span>Filters</span>
+            </div>
           </div>
-        </div>
-        <div className="admin-filter-grid">
-          <div className="admin-filter-field">
-            <label className="admin-filter-label">Question</label>
-            <div className="admin-filter-input-wrap">
-              <Search size={14} className="admin-filter-input-icon" />
-              <input
-                className="admin-filter-input"
-                placeholder="Search question..."
-                value={filters.question}
-                onChange={(e) => setFilters(f => ({ ...f, question: e.target.value }))}
+          <div className="flex gap-4 items-end flex-wrap max-md:flex-col max-md:gap-3">
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Question</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search question..."
+                  value={filters.question}
+                  onChange={(e) => setFilters(f => ({ ...f, question: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">User</Label>
+              <Input
+                className="bg-gray-50"
+                placeholder="Username..."
+                value={filters.user}
+                onChange={(e) => setFilters(f => ({ ...f, user: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Agent</Label>
+              <Input
+                className="bg-gray-50"
+                placeholder="Agent name..."
+                value={filters.agent}
+                onChange={(e) => setFilters(f => ({ ...f, agent: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Start Date</Label>
+              <Input
+                type="date"
+                className="bg-gray-50"
+                value={filters.startDate}
+                onChange={(e) => setFilters(f => ({ ...f, startDate: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">End Date</Label>
+              <Input
+                type="date"
+                className="bg-gray-50"
+                value={filters.endDate}
+                onChange={(e) => setFilters(f => ({ ...f, endDate: e.target.value }))}
               />
             </div>
           </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">User</label>
-            <input
-              className="admin-filter-input"
-              placeholder="Username..."
-              value={filters.user}
-              onChange={(e) => setFilters(f => ({ ...f, user: e.target.value }))}
-            />
+          <div className="flex gap-2 mt-3 pt-2.5 border-t border-gray-100">
+            <Button size="sm" onClick={handleSearch}>
+              <Search size={14} /> Search
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
+            >
+              <X size={14} /> Clear
+            </Button>
           </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Agent</label>
-            <input
-              className="admin-filter-input"
-              placeholder="Agent name..."
-              value={filters.agent}
-              onChange={(e) => setFilters(f => ({ ...f, agent: e.target.value }))}
-            />
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Start Date</label>
-            <input
-              type="date"
-              className="admin-filter-input"
-              value={filters.startDate}
-              onChange={(e) => setFilters(f => ({ ...f, startDate: e.target.value }))}
-            />
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">End Date</label>
-            <input
-              type="date"
-              className="admin-filter-input"
-              value={filters.endDate}
-              onChange={(e) => setFilters(f => ({ ...f, endDate: e.target.value }))}
-            />
-          </div>
-        </div>
-        <div className="admin-filter-actions">
-          <button className="btn-primary btn-sm" onClick={handleSearch}>
-            <Search size={14} /> Search
-          </button>
-          <button className="btn-secondary btn-sm" onClick={handleClear} disabled={!hasActiveFilters}>
-            <X size={14} /> Clear
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>User</th>
-              <th>Agent</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Table */}
+      <Card className="overflow-hidden max-md:overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">Question</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Agent</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredLogs.map((log) => (
-              <tr key={log.id}>
-                <td style={{ maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <TableRow key={log.id}>
+                <TableCell className="max-w-96 overflow-hidden text-ellipsis whitespace-nowrap">
                   {log.question}
-                </td>
-                <td>{log.username}</td>
-                <td>{log.agent_name}</td>
-                <td>{log.created_at ? new Date(log.created_at).toLocaleString() : '—'}</td>
-              </tr>
+                </TableCell>
+                <TableCell>{log.username}</TableCell>
+                <TableCell>{log.agent_name}</TableCell>
+                <TableCell>{log.created_at ? new Date(log.created_at).toLocaleString() : '\u2014'}</TableCell>
+              </TableRow>
             ))}
             {filteredLogs.length === 0 && (
-              <tr><td colSpan={4} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>No activity logs found</td></tr>
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-gray-400 py-8">No activity logs found</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   )
 }

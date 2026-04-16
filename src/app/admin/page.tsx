@@ -16,7 +16,7 @@ function Admin({ onLogout, activeTab = 'dashboard', testAgentId, onTestAgent }: 
   return (
     <div>
       <div className="flex justify-between items-center mb-6 max-md:flex-col max-md:items-start max-md:gap-3">
-        <h2 className="m-0 text-2xl max-md:text-xl font-bold text-gray-900 tracking-tight">{title}</h2>
+        <h2 className="m-0 text-xl font-bold text-gray-900">{title}</h2>
       </div>
 
       {tab === 'overview' && <DashboardTab onLogout={onLogout} testAgentId={testAgentId} />}

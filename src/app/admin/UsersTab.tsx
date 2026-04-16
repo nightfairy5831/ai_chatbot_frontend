@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Trash2, UserCheck, UserX, Search, X, Filter } from 'lucide-react'
 import Request from '../../lib/request'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 
 interface AdminUser {
   id: number
@@ -73,153 +80,156 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
       {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
       {/* Filter Card */}
-      <div
-        className="bg-white border border-gray-200 rounded-[10px] py-3 px-4 mb-4"
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+      <Card
+        className="mb-4"
+        onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
       >
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-1.5 text-[0.85rem] font-semibold text-gray-500 uppercase tracking-wide">
-            <Filter size={14} />
-            <span>Filters</span>
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <Filter size={14} />
+              <span>Filters</span>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-4 items-end flex-wrap max-md:flex-col max-md:gap-3">
-          <div className="flex flex-col gap-1 w-[260px] shrink-0 max-md:w-full max-md:shrink">
-            <label className="text-[0.8rem] font-semibold text-gray-400 tracking-wide">Name</label>
-            <div className="relative flex items-center">
-              <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
-              <input
-                className="w-full box-border py-2 pr-3 pl-8 border border-gray-200 rounded-[7px] text-[0.9rem] text-gray-700 bg-gray-50 outline-none transition-[border-color,background] duration-150 focus:border-blue-500 focus:bg-white placeholder:text-gray-400"
-                placeholder="Search name..."
-                value={filters.name}
-                onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+          <div className="flex gap-4 items-end flex-wrap max-md:flex-col max-md:gap-3">
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Name</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search name..."
+                  value={filters.name}
+                  onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Email</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search email..."
+                  value={filters.email}
+                  onChange={(e) => setFilters(f => ({ ...f, email: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Status</Label>
+              <Select
+                value={filters.status}
+                onValueChange={(value) => setFilters(f => ({ ...f, status: value || '' }))}
+              >
+                <SelectTrigger className="bg-gray-50">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Min Agents</Label>
+              <Input
+                className="bg-gray-50"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={filters.minAgents}
+                onChange={(e) => setFilters(f => ({ ...f, minAgents: e.target.value }))}
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1 w-[260px] shrink-0 max-md:w-full max-md:shrink">
-            <label className="text-[0.8rem] font-semibold text-gray-400 tracking-wide">Email</label>
-            <div className="relative flex items-center">
-              <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
-              <input
-                className="w-full box-border py-2 pr-3 pl-8 border border-gray-200 rounded-[7px] text-[0.9rem] text-gray-700 bg-gray-50 outline-none transition-[border-color,background] duration-150 focus:border-blue-500 focus:bg-white placeholder:text-gray-400"
-                placeholder="Search email..."
-                value={filters.email}
-                onChange={(e) => setFilters(f => ({ ...f, email: e.target.value }))}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1 w-[180px] shrink-0 max-md:w-full max-md:shrink">
-            <label className="text-[0.8rem] font-semibold text-gray-400 tracking-wide">Status</label>
-            <select
-              className="w-full box-border py-2 px-3 pr-7 border border-gray-200 rounded-[7px] text-[0.9rem] text-gray-700 bg-gray-50 outline-none cursor-pointer transition-[border-color,background] duration-150 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2710%27%20height%3D%276%27%20viewBox%3D%270%200%2010%206%27%20fill%3D%27none%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M1%201L5%205L9%201%27%20stroke%3D%27%239CA3AF%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.6rem_center] focus:border-blue-500 focus:bg-white"
-              value={filters.status}
-              onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
+          <div className="flex gap-2 mt-3 pt-2.5 border-t border-gray-100">
+            <Button size="sm" onClick={handleSearch}>
+              <Search size={14} /> Search
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+              <X size={14} /> Clear
+            </Button>
           </div>
-          <div className="flex flex-col gap-1 w-[180px] shrink-0 max-md:w-full max-md:shrink">
-            <label className="text-[0.8rem] font-semibold text-gray-400 tracking-wide">Min Agents</label>
-            <input
-              className="w-full box-border py-2 px-3 border border-gray-200 rounded-[7px] text-[0.9rem] text-gray-700 bg-gray-50 outline-none transition-[border-color,background] duration-150 focus:border-blue-500 focus:bg-white placeholder:text-gray-400"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={filters.minAgents}
-              onChange={(e) => setFilters(f => ({ ...f, minAgents: e.target.value }))}
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 mt-3 pt-2.5 border-t border-gray-100">
-          <button
-            className="inline-flex items-center gap-1.5 py-2 px-4 text-sm rounded-[7px] border-none bg-blue-500 text-white font-semibold cursor-pointer transition-colors duration-150 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
-            onClick={handleSearch}
-          >
-            <Search size={14} /> Search
-          </button>
-          <button
-            className="inline-flex items-center gap-1.5 py-2 px-4 text-sm rounded-[7px] border border-gray-200 bg-white text-gray-700 font-medium cursor-pointer transition-colors duration-150 hover:bg-gray-100 hover:border-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
-            onClick={handleClear}
-            disabled={!hasActiveFilters}
-          >
-            <X size={14} /> Clear
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden max-md:overflow-x-auto max-md:[&_::-webkit-scrollbar]{display:none}">
-        <table className="w-full border-collapse text-[0.95rem] max-md:min-w-[600px] max-[480px]:min-w-[500px] max-[480px]:text-[0.85rem]">
-          <thead>
-            <tr>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">User</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Email</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Role</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Status</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Agents</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Joined</th>
-              <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card className="overflow-hidden max-md:overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Email</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Role</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Agents</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Joined</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredUsers.map((u) => (
-              <tr key={u.id} className="hover:[&>td]:bg-[#fafafa]">
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 font-semibold">{u.username}</td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">{u.email}</td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">
-                  <span className={`inline-block py-0.5 px-2.5 rounded-md text-xs font-semibold capitalize ${
-                    u.role === 'admin'
-                      ? 'bg-blue-500/10 text-blue-500'
-                      : 'bg-gray-500/10 text-gray-500'
-                  }`}>
+              <TableRow key={u.id}>
+                <TableCell className="font-semibold">{u.username}</TableCell>
+                <TableCell>{u.email}</TableCell>
+                <TableCell>
+                  <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
                     {u.role}
-                  </span>
-                </td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">
-                  <span className={`inline-block py-0.5 px-2.5 rounded-md text-xs font-semibold capitalize ${
-                    u.is_active
-                      ? 'bg-emerald-500/10 text-emerald-500'
-                      : 'bg-red-500/10 text-red-500'
-                  }`}>
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={u.is_active ? 'default' : 'destructive'}
+                    className={u.is_active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-600 hover:bg-red-500/20'}
+                  >
                     {u.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">{u.agent_count}</td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
-                <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700">
+                  </Badge>
+                </TableCell>
+                <TableCell>{u.agent_count}</TableCell>
+                <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : '\u2014'}</TableCell>
+                <TableCell>
                   <div className="flex gap-1">
                     {u.role !== 'admin' && (
                       <>
-                        <button
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer text-gray-400 transition-[background,color] duration-150 hover:bg-gray-100 hover:text-gray-700 border-none bg-transparent p-0"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-400 hover:text-gray-700"
                           title={u.is_active ? 'Deactivate' : 'Activate'}
                           onClick={() => toggleUserActive(u)}
                         >
                           {u.is_active ? <UserX size={20} /> : <UserCheck size={20} />}
-                        </button>
-                        <button
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer text-gray-400 transition-[background,color] duration-150 hover:bg-red-50 hover:text-red-600 border-none bg-transparent p-0"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-400 hover:bg-red-50 hover:text-red-600"
                           title="Delete"
                           onClick={() => deleteUser(u)}
                         >
                           <Trash2 size={20} />
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
             {filteredUsers.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-center text-gray-400 py-8 px-4">No users found</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-8">No users found</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   )
 }

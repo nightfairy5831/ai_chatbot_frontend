@@ -65,17 +65,19 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:sticky top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col z-50 transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
-          <Bot size={26} className="text-blue-500" />
-          <span className="text-lg font-semibold text-gray-800">AI Chatbot</span>
+      <aside className={`fixed top-0 left-0 w-64 h-screen bg-white border-r border-gray-200 flex flex-col z-50 overflow-y-auto transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+          <span className="text-xl font-medium tracking-tight">
+            <span className="text-gray-800">Lead</span>
+            <span className="text-[#a8558f]">Lab</span>
+          </span>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -111,17 +113,19 @@ function App() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 text-gray-800 min-w-0">
+      <main className="md:ml-64 min-h-screen bg-gray-50 text-gray-800">
         {/* Mobile header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 md:hidden">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100">
             {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <Bot size={20} className="text-blue-500" />
-          <span className="font-semibold text-gray-800">AI Chatbot</span>
+          <span className="text-lg font-medium tracking-tight">
+            <span className="text-gray-800">Lead</span>
+            <span className="text-[#a8558f]">Lab</span>
+          </span>
         </div>
 
-        <div className="p-4 md:p-8 lg:p-10">
+        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
           {activePage === 'dashboard' && <Dashboard onLogout={handleLogout} onOpenAgent={handleOpenAgent} />}
           {activePage === 'agent-detail' && selectedAgentId && (
             <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />

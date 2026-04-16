@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react'
 import { Users, Bot, MessageSquare, UserCheck, Send, TrendingUp, Coins } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import Request from '../../lib/request'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 
 interface AdminStats {
   total_users: number
@@ -131,8 +136,8 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center gap-3 h-[calc(100vh-5rem)] text-gray-500 text-sm">
-      <div className="w-5 h-5 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+    <div className="flex items-center justify-center gap-3 min-h-60 text-gray-500 text-sm">
+      <div className="h-5 w-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
       Loading...
     </div>
   )
@@ -151,200 +156,231 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
         <div>
           {/* Stats Grid */}
           <div className="grid grid-cols-4 max-[900px]:grid-cols-2 max-[500px]:grid-cols-1 gap-4 max-md:gap-3 mb-6">
-            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500">
-                <Users size={26} />
+            <Card className="flex items-center gap-4 p-5 max-md:p-4 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-sm">
+              <div className="w-12 h-12 max-md:w-10 max-md:h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500">
+                <Users size={24} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_users}</span>
+                <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_users}</span>
                 <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Users</span>
               </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-500">
-                <UserCheck size={26} />
+            </Card>
+            <Card className="flex items-center gap-4 p-5 max-md:p-4 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-sm">
+              <div className="w-12 h-12 max-md:w-10 max-md:h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-500">
+                <UserCheck size={24} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.active_users}</span>
+                <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.active_users}</span>
                 <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Active Users</span>
               </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-amber-500/10 text-amber-500">
-                <Bot size={26} />
+            </Card>
+            <Card className="flex items-center gap-4 p-5 max-md:p-4 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-sm">
+              <div className="w-12 h-12 max-md:w-10 max-md:h-10 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 text-amber-500">
+                <Bot size={24} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_agents}</span>
+                <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_agents}</span>
                 <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Agents</span>
               </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[14px] p-7 max-md:p-4 flex items-center gap-5 max-md:gap-3 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <div className="w-[52px] h-[52px] max-md:w-10 max-md:h-10 rounded-xl max-md:rounded-[10px] flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-500">
-                <MessageSquare size={26} />
+            </Card>
+            <Card className="flex items-center gap-4 p-5 max-md:p-4 transition-[border-color,box-shadow] duration-150 hover:border-gray-300 hover:shadow-sm">
+              <div className="w-12 h-12 max-md:w-10 max-md:h-10 rounded-xl flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-500">
+                <MessageSquare size={24} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[1.85rem] max-md:text-[1.4rem] font-bold text-gray-900 leading-tight tracking-tight">{stats.total_questions}</span>
+                <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_questions}</span>
                 <span className="text-sm max-md:text-xs text-gray-500 mt-1 font-medium">Total Questions</span>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <Bot size={18} /> Agents Created (Last 30 Days)
-              </h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={agentChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Agents']} />
-                  <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <Users size={18} /> User Registrations (Last 30 Days)
-              </h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={registrationChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Registrations']} />
-                  <Bar dataKey="count" fill="#4f6ef7" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <Bot size={18} /> Agents Created (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-2">
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={agentChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Agents']} />
+                    <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <Users size={18} /> User Registrations (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-2">
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={registrationChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Registrations']} />
+                    <Bar dataKey="count" fill="#4f6ef7" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Token Usage Table + Chart */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <Coins size={18} /> Token Usage by Agent
-              </h3>
-              <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
-                <table className="w-full border-collapse text-[0.95rem] max-[480px]:min-w-[500px] max-[480px]:text-[0.85rem]">
-                  <thead>
-                    <tr>
-                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Agent</th>
-                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Owner</th>
-                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Questions</th>
-                      <th className="text-left py-3.5 px-4 max-[480px]:py-2.5 max-[480px]:px-2 bg-gray-50 font-semibold text-gray-700 border-b border-gray-200 text-[0.85rem] uppercase tracking-wider">Tokens</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tokenByAgent.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center text-slate-400">No token usage data yet.</td>
-                      </tr>
-                    ) : (
-                      tokenByAgent.map((row, i) => (
-                        <tr key={i} className="hover:[&>td]:bg-[#fafafa]">
-                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.agent_name}</td>
-                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.username}</td>
-                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.questions}</td>
-                          <td className="py-3 px-4 max-[480px]:py-2.5 max-[480px]:px-2 border-b border-gray-100 text-gray-700 last:border-b-0">{row.total_token.toLocaleString()}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <Coins size={18} /> Daily Token Usage (Last 30 Days)
-              </h3>
-              {tokenDaily.every(r => r.total_token === 0) ? (
-                <p className="text-slate-400 text-sm">No token usage data yet.</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={tokenDaily}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip labelFormatter={(v) => v} formatter={(v) => [Number(v).toLocaleString(), 'Tokens']} />
-                    <Bar dataKey="total_token" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <Coins size={18} /> Token Usage by Agent
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-2">
+                <div className="overflow-x-auto max-h-72 overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs uppercase tracking-wider">Agent</TableHead>
+                        <TableHead className="text-xs uppercase tracking-wider">Owner</TableHead>
+                        <TableHead className="text-xs uppercase tracking-wider">Questions</TableHead>
+                        <TableHead className="text-xs uppercase tracking-wider">Tokens</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tokenByAgent.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-gray-400">No token usage data yet.</TableCell>
+                        </TableRow>
+                      ) : (
+                        tokenByAgent.map((row, i) => (
+                          <TableRow key={i}>
+                            <TableCell>{row.agent_name}</TableCell>
+                            <TableCell>{row.username}</TableCell>
+                            <TableCell>{row.questions}</TableCell>
+                            <TableCell>{row.total_token.toLocaleString()}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <Coins size={18} /> Daily Token Usage (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-2">
+                {tokenDaily.every(r => r.total_token === 0) ? (
+                  <p className="text-gray-400 text-sm">No token usage data yet.</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={tokenDaily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <Tooltip labelFormatter={(v) => v} formatter={(v) => [Number(v).toLocaleString(), 'Tokens']} />
+                      <Bar dataKey="total_token" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Questions Chart + Live Test Panel */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5">
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <MessageSquare size={18} /> Questions (Last 30 Days)
-              </h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={questionChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Questions']} />
-                  <Line type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-[10px] pt-4 px-4 pb-2">
-              <h3 className="flex items-center gap-2 m-0 mb-4 text-[1.1rem] max-md:text-[0.95rem] font-bold text-gray-900 [&>svg]:text-blue-500">
-                <TrendingUp size={18} /> Live Agent Test
-              </h3>
-              <div className="bg-white border border-gray-200 rounded-xl p-5">
-                <div className="flex gap-3 mb-3">
-                  <select
-                    className="flex-1 w-full py-2.5 px-4 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors duration-150 focus:border-blue-500"
-                    value={testAgentId ?? ''}
-                    onChange={(e) => setTestAgentId(e.target.value ? Number(e.target.value) : null)}
-                  >
-                    <option value="">Select an agent to test...</option>
-                    {agents.length === 0 && <option disabled>Loading agents...</option>}
-                    {agents.map((a) => (
-                      <option key={a.id} value={a.id}>{a.name} ({a.owner_username})</option>
-                    ))}
-                  </select>
-                  {agents.length === 0 && (
-                    <button
-                      className="bg-emerald-500 text-white border-none rounded-lg px-4 py-2 cursor-pointer inline-flex items-center gap-1.5 hover:bg-emerald-600 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                      onClick={() => fetchAgents()}
-                      type="button"
-                      disabled={agentsLoading}
-                    >
-                      {agentsLoading ? <div className="w-4 h-4 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : 'Load'}
-                    </button>
-                  )}
-                </div>
-                <div className="flex gap-3 shrink-0 max-md:flex-col max-md:gap-2">
-                  <input
-                    className="flex-1 w-full py-2.5 px-4 rounded-lg border border-gray-200 text-base text-gray-800 bg-white outline-none transition-colors duration-150 focus:border-blue-500"
-                    placeholder="Type a test message..."
-                    value={testMessage}
-                    onChange={(e) => setTestMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleTestChat()}
-                    disabled={!testAgentId}
-                  />
-                  <button
-                    className="inline-flex items-center gap-1.5 py-2.5 px-5 rounded-lg border-none bg-blue-500 text-white text-[0.95rem] font-semibold cursor-pointer transition-colors duration-150 hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
-                    onClick={handleTestChat}
-                    disabled={testLoading || !testAgentId || !testMessage.trim()}
-                  >
-                    {testLoading ? <div className="w-4 h-4 border-[2.5px] border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : <Send size={16} />}
-                  </button>
-                </div>
-                {testResponse && (
-                  <div className="mt-3 max-h-[150px] overflow-y-auto bg-green-50 border border-green-200 rounded-[10px] p-4">
-                    <p className="text-xs font-semibold text-green-600 m-0 mb-2 uppercase tracking-wider">AI Response</p>
-                    <p className="text-[0.9rem] text-gray-800 m-0 leading-relaxed whitespace-pre-wrap">{testResponse}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <MessageSquare size={18} /> Questions (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-2">
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={questionChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip labelFormatter={(v) => v} formatter={(v) => [v, 'Questions']} />
+                    <Line type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900 [&>svg]:text-blue-500">
+                  <TrendingUp size={18} /> Live Agent Test
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Card>
+                  <CardContent className="p-5">
+                    <div className="flex gap-3 mb-3">
+                      <Select
+                        value={testAgentId ? String(testAgentId) : ''}
+                        onValueChange={(value) => setTestAgentId(value ? Number(value) : null)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select an agent to test..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agents.length === 0 && (
+                            <SelectItem value="__loading" disabled>Loading agents...</SelectItem>
+                          )}
+                          {agents.map((a) => (
+                            <SelectItem key={a.id} value={String(a.id)}>{a.name} ({a.owner_username})</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {agents.length === 0 && (
+                        <Button
+                          variant="default"
+                          className="bg-emerald-500 hover:bg-emerald-600"
+                          onClick={() => fetchAgents()}
+                          type="button"
+                          disabled={agentsLoading}
+                        >
+                          {agentsLoading ? <div className="h-4 w-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : 'Load'}
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex gap-3 shrink-0 max-md:flex-col max-md:gap-2">
+                      <Input
+                        className="flex-1"
+                        placeholder="Type a test message..."
+                        value={testMessage}
+                        onChange={(e) => setTestMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleTestChat()}
+                        disabled={!testAgentId}
+                      />
+                      <Button
+                        onClick={handleTestChat}
+                        disabled={testLoading || !testAgentId || !testMessage.trim()}
+                      >
+                        {testLoading ? <div className="h-4 w-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" /> : <Send size={16} />}
+                      </Button>
+                    </div>
+                    {testResponse && (
+                      <div className="mt-3 max-h-36 overflow-y-auto bg-green-50 border border-green-200 rounded-lg p-4">
+                        <p className="text-xs font-semibold text-green-600 m-0 mb-2 uppercase tracking-wider">AI Response</p>
+                        <p className="text-sm text-gray-800 m-0 leading-relaxed whitespace-pre-wrap">{testResponse}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}

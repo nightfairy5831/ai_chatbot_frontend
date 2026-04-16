@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Search, Trash2, MessageSquare, X, Filter } from 'lucide-react'
 import Request from '../../lib/request'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 
 interface AdminAgent {
   id: number
@@ -66,140 +71,162 @@ export default function AgentsTab({ onLogout, onTestAgent }: { onLogout: () => v
 
   return (
     <div>
-      {error && <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
-      <div className="admin-filter-card" onKeyDown={(e) => e.key === 'Enter' && handleSearch()}>
-        <div className="admin-filter-header">
-          <div className="admin-filter-title">
-            <Filter size={14} />
-            <span>Filters</span>
+      {/* Filter Card */}
+      <Card
+        className="mb-4"
+        onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
+      >
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <Filter size={14} />
+              <span>Filters</span>
+            </div>
           </div>
-        </div>
-        <div className="admin-filter-grid">
-          <div className="admin-filter-field">
-            <label className="admin-filter-label">Name</label>
-            <div className="admin-filter-input-wrap">
-              <Search size={14} className="admin-filter-input-icon" />
-              <input
-                className="admin-filter-input"
-                placeholder="Search name..."
-                value={filters.name}
-                onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+          <div className="flex gap-4 items-end flex-wrap max-md:flex-col max-md:gap-3">
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Name</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search name..."
+                  value={filters.name}
+                  onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Owner</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search owner..."
+                  value={filters.owner}
+                  onChange={(e) => setFilters(f => ({ ...f, owner: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Industry</Label>
+              <Input
+                className="bg-gray-50"
+                placeholder="Industry..."
+                value={filters.industry}
+                onChange={(e) => setFilters(f => ({ ...f, industry: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Tone</Label>
+              <Input
+                className="bg-gray-50"
+                placeholder="Tone..."
+                value={filters.tone}
+                onChange={(e) => setFilters(f => ({ ...f, tone: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Min Products</Label>
+              <Input
+                className="bg-gray-50"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={filters.minProducts}
+                onChange={(e) => setFilters(f => ({ ...f, minProducts: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Min Questions</Label>
+              <Input
+                className="bg-gray-50"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={filters.minQuestions}
+                onChange={(e) => setFilters(f => ({ ...f, minQuestions: e.target.value }))}
               />
             </div>
           </div>
-          <div className="admin-filter-field">
-            <label className="admin-filter-label">Owner</label>
-            <div className="admin-filter-input-wrap">
-              <Search size={14} className="admin-filter-input-icon" />
-              <input
-                className="admin-filter-input"
-                placeholder="Search owner..."
-                value={filters.owner}
-                onChange={(e) => setFilters(f => ({ ...f, owner: e.target.value }))}
-              />
-            </div>
+          <div className="flex gap-2 mt-3 pt-2.5 border-t border-gray-100">
+            <Button size="sm" onClick={handleSearch}>
+              <Search size={14} /> Search
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
+            >
+              <X size={14} /> Clear
+            </Button>
           </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Industry</label>
-            <input
-              className="admin-filter-input"
-              placeholder="Industry..."
-              value={filters.industry}
-              onChange={(e) => setFilters(f => ({ ...f, industry: e.target.value }))}
-            />
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Tone</label>
-            <input
-              className="admin-filter-input"
-              placeholder="Tone..."
-              value={filters.tone}
-              onChange={(e) => setFilters(f => ({ ...f, tone: e.target.value }))}
-            />
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Min Products</label>
-            <input
-              className="admin-filter-input"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={filters.minProducts}
-              onChange={(e) => setFilters(f => ({ ...f, minProducts: e.target.value }))}
-            />
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Min Questions</label>
-            <input
-              className="admin-filter-input"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={filters.minQuestions}
-              onChange={(e) => setFilters(f => ({ ...f, minQuestions: e.target.value }))}
-            />
-          </div>
-        </div>
-        <div className="admin-filter-actions">
-          <button className="btn-primary btn-sm" onClick={handleSearch}>
-            <Search size={14} /> Search
-          </button>
-          <button className="btn-secondary btn-sm" onClick={handleClear} disabled={!hasActiveFilters}>
-            <X size={14} /> Clear
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>Owner</th>
-              <th>Industry</th>
-              <th>Tone</th>
-              <th>Products</th>
-              <th>Questions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Table */}
+      <Card className="overflow-hidden max-md:overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">Agent</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Owner</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Industry</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Tone</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Products</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Questions</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredAgents.map((a) => (
-              <tr key={a.id}>
-                <td>
+              <TableRow key={a.id}>
+                <TableCell>
                   <div>
-                    <span style={{ fontWeight: 600 }}>{a.name}</span>
-                    {a.business_name && <span style={{ color: '#6b7280', fontSize: '0.8rem', display: 'block' }}>{a.business_name}</span>}
+                    <span className="font-semibold">{a.name}</span>
+                    {a.business_name && <span className="text-gray-500 text-xs block">{a.business_name}</span>}
                   </div>
-                </td>
-                <td>{a.owner_username}</td>
-                <td>{a.industry || '—'}</td>
-                <td>{a.tone || '—'}</td>
-                <td>{a.product_count}</td>
-                <td>{a.question_count}</td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button
-                      className="btn-icon"
+                </TableCell>
+                <TableCell>{a.owner_username}</TableCell>
+                <TableCell>{a.industry || '\u2014'}</TableCell>
+                <TableCell>{a.tone || '\u2014'}</TableCell>
+                <TableCell>{a.product_count}</TableCell>
+                <TableCell>{a.question_count}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-gray-700"
                       title="Test chat"
                       onClick={() => onTestAgent?.(a.id)}
                     >
                       <MessageSquare size={15} />
-                    </button>
-                    <button className="btn-icon danger" title="Delete" onClick={() => deleteAgent(a)}>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                      title="Delete"
+                      onClick={() => deleteAgent(a)}
+                    >
                       <Trash2 size={15} />
-                    </button>
+                    </Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
             {filteredAgents.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>No agents found</td></tr>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-8">No agents found</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   )
 }
