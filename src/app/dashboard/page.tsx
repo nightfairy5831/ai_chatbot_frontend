@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare, Activity } from 'lucide-react'
+import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare, Activity, ChevronRight } from 'lucide-react'
 import Request from '../../lib/request'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -7,14 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
 
 interface Agent {
   id: number
@@ -52,16 +44,12 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [logs, setLogs] = useState<ActivityLog[]>([])
-  const [logsLoading, setLogsLoading] = useState(false)
-  const [showLogs, setShowLogs] = useState(false)
 
   const fetchLogs = async () => {
-    setLogsLoading(true)
     try {
       const data = await Request.Get('/agents/logs')
       setLogs(data)
     } catch { /* ignore */ }
-    finally { setLogsLoading(false) }
   }
 
   const fetchData = async () => {
@@ -73,10 +61,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
       setAgents(agentsData)
       setStats(statsData)
     } catch (err: any) {
-      if (err.response?.status === 401) {
-        onLogout()
-        return
-      }
+      if (err.response?.status === 401) { onLogout(); return }
       setError(err.response?.data?.detail || 'Failed to load dashboard')
     } finally {
       setLoading(false)
@@ -85,76 +70,39 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
 
   useEffect(() => {
     fetchData()
+    fetchLogs()
   }, [])
 
-  const openCreateForm = () => {
-    setEditingAgent(null)
-    setFormName('')
-    setFormDescription('')
-    setFormError(null)
-    setShowForm(true)
-  }
-
-  const openEditForm = (e: React.MouseEvent, agent: Agent) => {
-    e.stopPropagation()
-    setEditingAgent(agent)
-    setFormName(agent.name)
-    setFormDescription(agent.description || '')
-    setFormError(null)
-    setShowForm(true)
-  }
-
-  const closeForm = () => {
-    setShowForm(false)
-    setEditingAgent(null)
-    setFormName('')
-    setFormDescription('')
-    setFormError(null)
-  }
+  const openCreateForm = () => { setEditingAgent(null); setFormName(''); setFormDescription(''); setFormError(null); setShowForm(true) }
+  const openEditForm = (e: React.MouseEvent, agent: Agent) => { e.stopPropagation(); setEditingAgent(agent); setFormName(agent.name); setFormDescription(agent.description || ''); setFormError(null); setShowForm(true) }
+  const closeForm = () => { setShowForm(false); setEditingAgent(null); setFormName(''); setFormDescription(''); setFormError(null) }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formName.trim()) {
-      setFormError('Name is required')
-      return
-    }
-    setSaving(true)
-    setFormError(null)
+    if (!formName.trim()) { setFormError('Name is required'); return }
+    setSaving(true); setFormError(null)
     try {
       if (editingAgent) {
-        await Request.Patch(`/agents/${editingAgent.id}`, {
-          name: formName.trim(),
-          description: formDescription.trim() || null,
-        })
+        await Request.Patch(`/agents/${editingAgent.id}`, { name: formName.trim(), description: formDescription.trim() || null })
       } else {
-        await Request.Post('/agents/', {
-          name: formName.trim(),
-          description: formDescription.trim() || null,
-        })
+        await Request.Post('/agents/', { name: formName.trim(), description: formDescription.trim() || null })
       }
-      closeForm()
-      await fetchData()
+      closeForm(); await fetchData()
     } catch (err: any) {
       setFormError(err.response?.data?.detail || 'Failed to save agent')
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (e: React.MouseEvent, agent: Agent) => {
     e.stopPropagation()
     if (!confirm(`Delete "${agent.name}"? This cannot be undone.`)) return
-    try {
-      await Request.Delete(`/agents/${agent.id}`)
-      await fetchData()
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to delete agent')
-    }
+    try { await Request.Delete(`/agents/${agent.id}`); await fetchData() }
+    catch (err: any) { setError(err.response?.data?.detail || 'Failed to delete agent') }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2.5 py-12 text-gray-400 text-sm">
+      <div className="flex items-center justify-center gap-2 py-20 text-gray-400 text-sm">
         <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
         Loading...
       </div>
@@ -163,221 +111,147 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
 
   return (
     <div>
-      {/* Dashboard Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="m-0 text-xl font-bold text-gray-900">Dashboard</h2>
+      {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <StatCard icon={<Bot size={18} />} color="blue" value={stats.total_agents} label="Agents" />
+        <StatCard icon={<Box size={18} />} color="emerald" value={stats.total_products} label="Products" />
+        <StatCard icon={<MessageSquare size={18} />} color="violet" value={stats.total_questions} label="Questions" />
+        <StatCard icon={<TrendingUp size={18} />} color="amber" value={stats.most_used_agent?.name || '—'} label="Top Agent" isText />
       </div>
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {/* Agents Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Agents</h2>
+          {!showForm && (
+            <Button size="sm" onClick={openCreateForm}>
+              <Plus size={14} /> New Agent
+            </Button>
+          )}
+        </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total Agents */}
-        <Card className="transition-all hover:border-gray-300 hover:shadow-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500">
-              <Bot size={26} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_agents}</span>
-              <span className="text-sm text-gray-500 mt-1 font-medium">Total Agents</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Create/Edit Form */}
+        {showForm && (
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <form onSubmit={handleSubmit}>
+                <h3 className="m-0 mb-3 text-sm font-semibold text-gray-900">{editingAgent ? 'Edit Agent' : 'New Agent'}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">Name</Label>
+                    <Input placeholder="My Agent" value={formName} onChange={(e) => setFormName(e.target.value)} autoFocus />
+                  </div>
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">Description</Label>
+                    <Textarea placeholder="What does this agent do?" value={formDescription} onChange={(e) => setFormDescription(e.target.value)} className="resize-none h-10" />
+                  </div>
+                </div>
+                {formError && <p className="text-red-600 text-xs mb-2">{formError}</p>}
+                <div className="flex gap-2">
+                  <Button type="submit" size="sm" disabled={saving}>{saving ? 'Saving...' : editingAgent ? 'Update' : 'Create'}</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={closeForm}>Cancel</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Total Products */}
-        <Card className="transition-all hover:border-gray-300 hover:shadow-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-500">
-              <Box size={26} />
+        {/* Agent List */}
+        {agents.length === 0 ? (
+          <Card className="py-10 text-center text-gray-400 text-sm">
+            <p className="m-0">No agents yet. Create your first agent to get started.</p>
+          </Card>
+        ) : (
+          <Card>
+            <div className="divide-y divide-gray-100">
+              {agents.map((agent) => (
+                <div
+                  key={agent.id}
+                  className="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => onOpenAgent(agent.id)}
+                >
+                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                    <Bot size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 m-0 truncate">{agent.name}</p>
+                    {agent.description && <p className="text-xs text-gray-400 m-0 truncate">{agent.description}</p>}
+                  </div>
+                  <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-blue-600" title="Edit" onClick={(e) => openEditForm(e, agent)}>
+                      <Pencil size={14} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={(e) => handleDelete(e, agent)}>
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                  <ChevronRight size={16} className="text-gray-300 shrink-0" />
+                </div>
+              ))}
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_products}</span>
-              <span className="text-sm text-gray-500 mt-1 font-medium">Total Products</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Most Used Agent */}
-        <Card className="transition-all hover:border-gray-300 hover:shadow-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 text-amber-500">
-              <TrendingUp size={26} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-lg font-semibold text-gray-900 leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">{stats.most_used_agent?.name || '—'}</span>
-              <span className="text-sm text-gray-500 mt-1 font-medium">Most Used Agent</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Questions */}
-        <Card className="transition-all hover:border-gray-300 hover:shadow-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-500">
-              <MessageSquare size={26} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-2xl font-bold text-gray-900 leading-tight">{stats.total_questions}</span>
-              <span className="text-sm text-gray-500 mt-1 font-medium">Total Questions</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Dashboard Actions */}
-      <div className="mb-6">
-        {!showForm && (
-          <Button onClick={openCreateForm}>
-            <Plus size={16} /> Create Agent
-          </Button>
+          </Card>
         )}
       </div>
 
-      {/* Create/Edit Agent Form */}
-      {showForm && (
-        <Card className="mb-4">
-          <CardContent className="p-5">
-            <form onSubmit={handleSubmit}>
-              <h3 className="m-0 mb-4 text-base font-semibold text-gray-900">{editingAgent ? 'Edit Agent' : 'Create Agent'}</h3>
-              <div className="mb-3">
-                <Label className="block text-sm font-medium text-gray-700 mb-1.5">Name</Label>
-                <Input
-                  type="text"
-                  placeholder="My Agent"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <div className="mb-3">
-                <Label className="block text-sm font-medium text-gray-700 mb-1.5">Description</Label>
-                <Textarea
-                  placeholder="What does this agent do?"
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  className="resize-y min-h-20"
-                />
-              </div>
-              {formError && (
-                <p className="text-red-600 text-sm m-0 mb-2">{formError}</p>
-              )}
-              <div className="flex gap-3 mt-3">
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving...' : editingAgent ? 'Update' : 'Create'}
-                </Button>
-                <Button type="button" variant="outline" onClick={closeForm}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Agent List */}
-      {agents.length === 0 ? (
-        <div className="text-center py-12 px-4 text-gray-400 text-sm leading-relaxed">
-          <p>No agents yet. Create your first agent to get started.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {agents.map((agent) => (
-            <Card
-              className="px-5 py-4 transition-all cursor-pointer hover:border-blue-300 hover:shadow-sm"
-              key={agent.id}
-              onClick={() => onOpenAgent(agent.id)}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                  <Bot size={24} />
+      {/* Recent Activity */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Activity size={16} /> Recent Activity
+        </h2>
+        {logs.length === 0 ? (
+          <Card className="py-8 text-center text-gray-400 text-sm">
+            <p className="m-0">No activity yet.</p>
+          </Card>
+        ) : (
+          <Card>
+            <div className="divide-y divide-gray-50">
+              {logs.slice(0, 8).map((log) => (
+                <div key={log.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                    <MessageSquare size={14} className="text-gray-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-800 font-medium m-0 truncate">{log.question}</p>
+                    <p className="text-xs text-gray-500 m-0 mt-0.5">{log.agent_name}</p>
+                  </div>
+                  <Badge variant="secondary" className={`shrink-0 rounded-full text-xs px-2.5 py-0.5 ${log.source_channel === 'whatsapp' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                    {log.source_channel}
+                  </Badge>
+                  <span className="text-xs text-gray-500 shrink-0 text-right whitespace-nowrap">
+                    {log.created_at ? new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + new Date(log.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-gray-900 m-0 tracking-tight">{agent.name}</p>
-                  {agent.description && (
-                    <p className="text-sm text-gray-500 mt-1 m-0 leading-relaxed">{agent.description}</p>
-                  )}
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-8 h-8 text-gray-400 hover:text-gray-700"
-                    title="Edit"
-                    onClick={(e) => openEditForm(e, agent)}
-                  >
-                    <Pencil size={15} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-8 h-8 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                    title="Delete"
-                    onClick={(e) => handleDelete(e, agent)}
-                  >
-                    <Trash2 size={15} />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Activity Logs */}
-      <div className="mt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="m-0 flex items-center gap-2 text-base font-semibold text-gray-900">
-            <Activity size={18} /> Recent Activity
-          </h3>
-          <Button
-            variant="outline"
-            onClick={() => { setShowLogs(!showLogs); if (!showLogs && logs.length === 0) fetchLogs() }}
-          >
-            {showLogs ? 'Hide' : 'Show'}
-          </Button>
-        </div>
-        {showLogs && (
-          logsLoading ? (
-            <div className="flex items-center justify-center gap-2.5 py-12 text-gray-400 text-sm">
-              <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-              Loading...
+              ))}
             </div>
-          ) : logs.length === 0 ? (
-            <div className="text-center py-12 px-4 text-gray-400 text-sm leading-relaxed">
-              <p>No activity yet.</p>
-            </div>
-          ) : (
-            <Card className="overflow-x-auto">
-              <Table className="min-w-[600px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs uppercase tracking-wider">Agent</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wider">Question</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wider">Channel</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wider">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell className="text-gray-700">{log.agent_name}</TableCell>
-                      <TableCell className="text-gray-700 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">{log.question}</TableCell>
-                      <TableCell>
-                        <Badge variant={log.source_channel === 'whatsapp' ? 'default' : 'secondary'} className={log.source_channel === 'whatsapp' ? 'bg-green-100 text-green-600 hover:bg-green-100' : 'bg-sky-100 text-sky-700 hover:bg-sky-100'}>
-                          {log.source_channel}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">{log.created_at ? new Date(log.created_at).toLocaleString() : '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          )
+          </Card>
         )}
       </div>
     </div>
+  )
+}
+
+function StatCard({ icon, color, value, label, isText }: { icon: React.ReactNode; color: string; value: string | number; label: string; isText?: boolean }) {
+  const colorMap: Record<string, string> = {
+    blue: 'bg-blue-500/10 text-blue-500',
+    emerald: 'bg-emerald-500/10 text-emerald-500',
+    violet: 'bg-violet-500/10 text-violet-500',
+    amber: 'bg-amber-500/10 text-amber-500',
+  }
+
+  return (
+    <Card className="transition-all hover:shadow-sm">
+      <CardContent className="flex items-center gap-3 p-3.5">
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${colorMap[color]}`}>
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <p className={`m-0 font-bold text-gray-900 leading-tight ${isText ? 'text-sm truncate' : 'text-xl'}`}>{value}</p>
+          <p className="m-0 text-xs text-gray-400">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

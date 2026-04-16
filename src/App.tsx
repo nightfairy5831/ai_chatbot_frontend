@@ -115,7 +115,7 @@ function App() {
       {/* Main content */}
       <main className="md:ml-64 min-h-screen bg-gray-50 text-gray-800">
         {/* Mobile header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 md:hidden">
+        <div className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50 md:hidden">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100">
             {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
