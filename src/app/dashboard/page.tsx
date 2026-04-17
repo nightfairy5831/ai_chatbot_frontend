@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Bot, Box, TrendingUp, MessageSquare, Activity, ChevronRight } from 'lucide-react'
 import Request from '../../lib/request'
 import { Button } from '@/components/ui/button'
+import { Loading } from '@/components/ui/loading'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -101,12 +102,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-20 text-gray-400 text-sm">
-        <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-        Loading...
-      </div>
-    )
+    return <Loading />
   }
 
   return (

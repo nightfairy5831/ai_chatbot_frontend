@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare
 import Request from '../../lib/request'
 
 import { Button } from '@/components/ui/button'
+import { Loading } from '@/components/ui/loading'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -322,12 +323,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center gap-3 min-h-60 text-gray-500 text-sm">
-      <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-      Loading...
-    </div>
-  )
+  if (loading) return <Loading />
   if (!agent) return <p>Agent not found.</p>
 
   return (

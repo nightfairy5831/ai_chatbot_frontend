@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Users, Bot, MessageSquare, UserCheck, Send, TrendingUp, Coins } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import Request from '../../lib/request'
+import { Loading } from '@/components/ui/loading'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -135,12 +136,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
     }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center gap-3 min-h-60 text-gray-500 text-sm">
-      <div className="h-5 w-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-      Loading...
-    </div>
-  )
+  if (loading) return <Loading />
 
   if (error && !stats) return (
     <div className="text-center py-12 px-4 text-gray-400 text-sm leading-relaxed">

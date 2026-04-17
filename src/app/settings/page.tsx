@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { User, Lock, Activity, Save, CheckCircle, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Loading } from '@/components/ui/loading'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -116,12 +117,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
   }
 
   if (profileLoading) {
-    return (
-      <div className="flex items-center justify-center gap-2.5 py-12 text-muted-foreground text-sm">
-        <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-        Loading...
-      </div>
-    )
+    return <Loading />
   }
 
   return (
@@ -133,108 +129,65 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="profile">
-        <TabsList className="mb-6">
+        <TabsList className="mb-4">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="api">API Test</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
-        <TabsContent value="profile" className="max-w-full space-y-4">
-          {/* Profile Form */}
+        <TabsContent value="profile" className="max-w-full space-y-3">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                <User size={22} className="text-primary" /> Profile
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleProfileSave} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Your username"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                  />
+            <CardContent className="p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
+                <User size={16} className="text-blue-500" /> Profile
+              </h3>
+              <form onSubmit={handleProfileSave}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <Label htmlFor="username" className="block text-xs font-medium text-gray-500 mb-1">Username</Label>
+                    <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your username" />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="block text-xs font-medium text-gray-500 mb-1">Email</Label>
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
+                  </div>
                 </div>
                 {profileMsg && (
-                  <p className={`text-sm m-0 ${profileMsg.isError ? 'text-destructive' : 'text-green-600'}`}>
-                    {profileMsg.text}
-                  </p>
+                  <p className={`text-xs m-0 mb-2 ${profileMsg.isError ? 'text-red-600' : 'text-green-600'}`}>{profileMsg.text}</p>
                 )}
-                <div className="flex gap-3 pt-1">
-                  <Button type="submit" disabled={profileSaving} className="gap-1.5">
-                    <Save size={18} /> {profileSaving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
+                <Button type="submit" size="sm" disabled={profileSaving} className="gap-1.5">
+                  <Save size={14} /> {profileSaving ? 'Saving...' : 'Save'}
+                </Button>
               </form>
             </CardContent>
           </Card>
 
-          {/* Change Password Form */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                <Lock size={22} className="text-primary" /> Change Password
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordChange} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input
-                    id="current-password"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Enter current password"
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                    required
-                  />
+            <CardContent className="p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
+                <Lock size={16} className="text-blue-500" /> Change Password
+              </h3>
+              <form onSubmit={handlePasswordChange}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <Label htmlFor="current-password" className="block text-xs font-medium text-gray-500 mb-1">Current Password</Label>
+                    <Input id="current-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Current password" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="new-password" className="block text-xs font-medium text-gray-500 mb-1">New Password</Label>
+                    <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirm-password" className="block text-xs font-medium text-gray-500 mb-1">Confirm</Label>
+                    <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" required />
+                  </div>
                 </div>
                 {passwordMsg && (
-                  <p className={`text-sm m-0 ${passwordMsg.isError ? 'text-destructive' : 'text-green-600'}`}>
-                    {passwordMsg.text}
-                  </p>
+                  <p className={`text-xs m-0 mb-2 ${passwordMsg.isError ? 'text-red-600' : 'text-green-600'}`}>{passwordMsg.text}</p>
                 )}
-                <div className="flex gap-3 pt-1">
-                  <Button type="submit" disabled={passwordSaving} className="gap-1.5">
-                    <Lock size={18} /> {passwordSaving ? 'Changing...' : 'Change Password'}
-                  </Button>
-                </div>
+                <Button type="submit" size="sm" disabled={passwordSaving} className="gap-1.5">
+                  <Lock size={14} /> {passwordSaving ? 'Changing...' : 'Change Password'}
+                </Button>
               </form>
             </CardContent>
           </Card>
