@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Trash2, UserCheck, UserX, Search, X, Filter } from 'lucide-react'
 import Request from '../../lib/request'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 
 interface AdminUser {
   id: number
@@ -70,126 +77,159 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div>
-      {error && <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+      {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
-      <div className="admin-filter-card" onKeyDown={(e) => e.key === 'Enter' && handleSearch()}>
-        <div className="admin-filter-header">
-          <div className="admin-filter-title">
-            <Filter size={14} />
-            <span>Filters</span>
+      {/* Filter Card */}
+      <Card
+        className="mb-4"
+        onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
+      >
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <Filter size={14} />
+              <span>Filters</span>
+            </div>
           </div>
-        </div>
-        <div className="admin-filter-grid">
-          <div className="admin-filter-field">
-            <label className="admin-filter-label">Name</label>
-            <div className="admin-filter-input-wrap">
-              <Search size={14} className="admin-filter-input-icon" />
-              <input
-                className="admin-filter-input"
-                placeholder="Search name..."
-                value={filters.name}
-                onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+          <div className="flex gap-4 items-end flex-wrap max-md:flex-col max-md:gap-3">
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Name</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search name..."
+                  value={filters.name}
+                  onChange={(e) => setFilters(f => ({ ...f, name: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-64 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Email</Label>
+              <div className="relative flex items-center">
+                <Search size={14} className="absolute left-2.5 text-gray-300 pointer-events-none" />
+                <Input
+                  className="pl-8 bg-gray-50"
+                  placeholder="Search email..."
+                  value={filters.email}
+                  onChange={(e) => setFilters(f => ({ ...f, email: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Status</Label>
+              <Select
+                value={filters.status}
+                onValueChange={(value) => setFilters(f => ({ ...f, status: value || '' }))}
+              >
+                <SelectTrigger className="bg-gray-50">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1 w-44 shrink-0 max-md:w-full max-md:shrink">
+              <Label className="text-xs font-semibold text-gray-400 tracking-wide">Min Agents</Label>
+              <Input
+                className="bg-gray-50"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={filters.minAgents}
+                onChange={(e) => setFilters(f => ({ ...f, minAgents: e.target.value }))}
               />
             </div>
           </div>
-          <div className="admin-filter-field">
-            <label className="admin-filter-label">Email</label>
-            <div className="admin-filter-input-wrap">
-              <Search size={14} className="admin-filter-input-icon" />
-              <input
-                className="admin-filter-input"
-                placeholder="Search email..."
-                value={filters.email}
-                onChange={(e) => setFilters(f => ({ ...f, email: e.target.value }))}
-              />
-            </div>
-          </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Status</label>
-            <select
-              className="admin-filter-select"
-              value={filters.status}
-              onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
+          <div className="flex gap-2 mt-3 pt-2.5 border-t border-gray-100">
+            <Button size="sm" onClick={handleSearch}>
+              <Search size={14} /> Search
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClear}
+              disabled={!hasActiveFilters}
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+              <X size={14} /> Clear
+            </Button>
           </div>
-          <div className="admin-filter-field admin-filter-field--narrow">
-            <label className="admin-filter-label">Min Agents</label>
-            <input
-              className="admin-filter-input"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={filters.minAgents}
-              onChange={(e) => setFilters(f => ({ ...f, minAgents: e.target.value }))}
-            />
-          </div>
-        </div>
-        <div className="admin-filter-actions">
-          <button className="btn-primary btn-sm" onClick={handleSearch}>
-            <Search size={14} /> Search
-          </button>
-          <button className="btn-secondary btn-sm" onClick={handleClear} disabled={!hasActiveFilters}>
-            <X size={14} /> Clear
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Agents</th>
-              <th>Joined</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Table */}
+      <Card className="overflow-hidden max-md:overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Email</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Role</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Agents</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Joined</TableHead>
+              <TableHead className="text-xs uppercase tracking-wider">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredUsers.map((u) => (
-              <tr key={u.id}>
-                <td style={{ fontWeight: 600 }}>{u.username}</td>
-                <td>{u.email}</td>
-                <td>
-                  <span className={`admin-badge ${u.role === 'admin' ? 'badge-admin' : 'badge-client'}`}>
+              <TableRow key={u.id}>
+                <TableCell className="font-semibold">{u.username}</TableCell>
+                <TableCell>{u.email}</TableCell>
+                <TableCell>
+                  <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
                     {u.role}
-                  </span>
-                </td>
-                <td>
-                  <span className={`admin-badge ${u.is_active ? 'badge-active' : 'badge-inactive'}`}>
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={u.is_active ? 'default' : 'destructive'}
+                    className={u.is_active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-600 hover:bg-red-500/20'}
+                  >
                     {u.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td>{u.agent_count}</td>
-                <td>{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  </Badge>
+                </TableCell>
+                <TableCell>{u.agent_count}</TableCell>
+                <TableCell>{u.created_at ? new Date(u.created_at).toLocaleDateString() : '\u2014'}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
                     {u.role !== 'admin' && (
                       <>
-                        <button className="btn-icon" title={u.is_active ? 'Deactivate' : 'Activate'} onClick={() => toggleUserActive(u)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-400 hover:text-gray-700"
+                          title={u.is_active ? 'Deactivate' : 'Activate'}
+                          onClick={() => toggleUserActive(u)}
+                        >
                           {u.is_active ? <UserX size={20} /> : <UserCheck size={20} />}
-                        </button>
-                        <button className="btn-icon danger" title="Delete" onClick={() => deleteUser(u)}>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                          title="Delete"
+                          onClick={() => deleteUser(u)}
+                        >
                           <Trash2 size={20} />
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
             {filteredUsers.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>No users found</td></tr>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-8">No users found</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   )
 }

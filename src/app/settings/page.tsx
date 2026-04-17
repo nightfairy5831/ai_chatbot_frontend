@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react'
 import { User, Lock, Activity, Save, CheckCircle, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Loading } from '@/components/ui/loading'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Request from '../../lib/request'
 
 interface SettingsProps {
@@ -8,8 +14,6 @@ interface SettingsProps {
 }
 
 function Settings({ onLogout, onUsernameChange }: SettingsProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'api'>('profile')
-
   // Profile state
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -113,102 +117,124 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
   }
 
   if (profileLoading) {
-    return <div className="loading-state"><div className="spinner" />Loading...</div>
+    return <Loading />
   }
 
   return (
     <div>
-      <div className="dashboard-header">
-        <h2>Settings</h2>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="m-0 text-xl font-bold text-gray-900">Settings</h2>
       </div>
 
-      <div className="tabs">
-        <button className={`tab${activeTab === 'profile' ? ' active' : ''}`} onClick={() => setActiveTab('profile')}>Profile</button>
-        <button className={`tab${activeTab === 'api' ? ' active' : ''}`} onClick={() => setActiveTab('api')}>API Test</button>
-      </div>
+      {/* Tabs */}
+      <Tabs defaultValue="profile">
+        <TabsList className="mb-4">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="api">API Test</TabsTrigger>
+        </TabsList>
 
-      {activeTab === 'profile' && (
-        <div className="tab-content">
-          <form className="agent-form" onSubmit={handleProfileSave}>
-            <h3 className="settings-section-title"><User size={22} /> Profile</h3>
-            <div className="form-group">
-              <label>Username</label>
-              <input className="form-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your username" />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input className="form-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
-            </div>
-            {profileMsg && (
-              <p style={{ color: profileMsg.isError ? '#dc2626' : '#16a34a', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
-                {profileMsg.text}
-              </p>
-            )}
-            <div className="form-actions">
-              <button className="btn-primary" type="submit" disabled={profileSaving}>
-                <Save size={18} /> {profileSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
+        {/* Profile Tab */}
+        <TabsContent value="profile" className="max-w-full space-y-3">
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
+                <User size={16} className="text-blue-500" /> Profile
+              </h3>
+              <form onSubmit={handleProfileSave}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <Label htmlFor="username" className="block text-xs font-medium text-gray-500 mb-1">Username</Label>
+                    <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your username" />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="block text-xs font-medium text-gray-500 mb-1">Email</Label>
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
+                  </div>
+                </div>
+                {profileMsg && (
+                  <p className={`text-xs m-0 mb-2 ${profileMsg.isError ? 'text-red-600' : 'text-green-600'}`}>{profileMsg.text}</p>
+                )}
+                <Button type="submit" size="sm" disabled={profileSaving} className="gap-1.5">
+                  <Save size={14} /> {profileSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-          <form className="agent-form" onSubmit={handlePasswordChange}>
-            <h3 className="settings-section-title"><Lock size={22} /> Change Password</h3>
-            <div className="form-group">
-              <label>Current Password</label>
-              <input className="form-input" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Enter current password" required />
-            </div>
-            <div className="form-group">
-              <label>New Password</label>
-              <input className="form-input" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" required />
-            </div>
-            <div className="form-group">
-              <label>Confirm New Password</label>
-              <input className="form-input" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" required />
-            </div>
-            {passwordMsg && (
-              <p style={{ color: passwordMsg.isError ? '#dc2626' : '#16a34a', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
-                {passwordMsg.text}
-              </p>
-            )}
-            <div className="form-actions">
-              <button className="btn-primary" type="submit" disabled={passwordSaving}>
-                <Lock size={18} /> {passwordSaving ? 'Changing...' : 'Change Password'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
+                <Lock size={16} className="text-blue-500" /> Change Password
+              </h3>
+              <form onSubmit={handlePasswordChange}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <Label htmlFor="current-password" className="block text-xs font-medium text-gray-500 mb-1">Current Password</Label>
+                    <Input id="current-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Current password" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="new-password" className="block text-xs font-medium text-gray-500 mb-1">New Password</Label>
+                    <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirm-password" className="block text-xs font-medium text-gray-500 mb-1">Confirm</Label>
+                    <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" required />
+                  </div>
+                </div>
+                {passwordMsg && (
+                  <p className={`text-xs m-0 mb-2 ${passwordMsg.isError ? 'text-red-600' : 'text-green-600'}`}>{passwordMsg.text}</p>
+                )}
+                <Button type="submit" size="sm" disabled={passwordSaving} className="gap-1.5">
+                  <Lock size={14} /> {passwordSaving ? 'Changing...' : 'Change Password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {activeTab === 'api' && (
-        <div className="tab-content">
-          <div className="agent-form">
-            <h3 className="settings-section-title"><Activity size={22} /> API Health Check</h3>
-            <div className="form-actions" style={{ marginTop: 0 }}>
-              <button className="btn-primary" type="button" onClick={handleHealthCheck} disabled={healthLoading}>
-                <Activity size={18} /> {healthLoading ? 'Checking...' : 'Run Health Check'}
-              </button>
-            </div>
-
-            {healthLoading && (
-              <div className="loading-state" style={{ padding: '1.5rem 1rem' }}>
-                <div className="spinner" />Checking API status...
+        {/* API Test Tab */}
+        <TabsContent value="api" className="max-w-full">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <Activity size={22} className="text-primary" /> API Health Check
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  onClick={handleHealthCheck}
+                  disabled={healthLoading}
+                  className="gap-1.5"
+                >
+                  <Activity size={18} /> {healthLoading ? 'Checking...' : 'Run Health Check'}
+                </Button>
               </div>
-            )}
 
-            {healthError && (
-              <div className="health-result health-error">
-                <AlertCircle size={16} /> {healthError}
-              </div>
-            )}
+              {healthLoading && (
+                <div className="flex items-center justify-center gap-2.5 py-4 text-muted-foreground text-sm">
+                  <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                  Checking API status...
+                </div>
+              )}
 
-            {healthResponse && (
-              <div className="health-result health-success">
-                <CheckCircle size={16} /> API is healthy: {JSON.stringify(healthResponse)}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              {healthError && (
+                <div className="flex items-center gap-2 p-3 rounded-lg text-base bg-destructive/10 border border-destructive/20 text-destructive">
+                  <AlertCircle size={16} /> {healthError}
+                </div>
+              )}
+
+              {healthResponse && (
+                <div className="flex items-center gap-2 p-3 rounded-lg text-base bg-green-50 border border-green-200 text-green-600">
+                  <CheckCircle size={16} /> API is healthy: {JSON.stringify(healthResponse)}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
