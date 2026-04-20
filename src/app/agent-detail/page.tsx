@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2 } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2, Phone } from 'lucide-react'
 import Request from '../../lib/request'
 
 import { Button } from '@/components/ui/button'
@@ -92,6 +92,44 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const [chatError, setChatError] = useState<string | null>(null)
   const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([])
 
+  // WhatsApp
+  const [waNumbers, setWaNumbers] = useState<{ id: number; phone_number: string; is_active: boolean }[]>([])
+  const [waAvailable, setWaAvailable] = useState<{ phone_number: string; friendly_name: string }[]>([])
+  const [waLoading, setWaLoading] = useState(false)
+  const [waCountry, setWaCountry] = useState('US')
+
+  const fetchWaNumbers = async () => {
+    try {
+      const data = await Request.Get(`/whatsapp/agents/${agentId}/numbers`)
+      setWaNumbers(data)
+    } catch { /* ignore */ }
+  }
+
+  const fetchAvailableNumbers = async () => {
+    setWaLoading(true)
+    try {
+      const data = await Request.Get(`/whatsapp/available-numbers?country=${waCountry}`)
+      setWaAvailable(data)
+    } catch { /* ignore */ }
+    finally { setWaLoading(false) }
+  }
+
+  const connectWaNumber = async (phoneNumber: string) => {
+    try {
+      await Request.Post(`/whatsapp/agents/${agentId}/connect`, { phone_number: phoneNumber, agent_id: agentId })
+      await fetchWaNumbers()
+      setWaAvailable([])
+    } catch { /* ignore */ }
+  }
+
+  const disconnectWaNumber = async (numberId: number) => {
+    if (!confirm('Disconnect this WhatsApp number?')) return
+    try {
+      await Request.Delete(`/whatsapp/numbers/${numberId}`)
+      await fetchWaNumbers()
+    } catch { /* ignore */ }
+  }
+
   // Calendar
   const [calendarConnected, setCalendarConnected] = useState(false)
   const [calendarLoading, setCalendarLoading] = useState(false)
@@ -172,6 +210,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     fetchAgent()
     fetchProducts()
     fetchCalendarConnection()
+    fetchWaNumbers()
   }, [agentId])
 
   // Config handlers
@@ -366,6 +405,12 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
           >
             <Calendar size={16} /> Calendar
+          </TabsTrigger>
+          <TabsTrigger
+            value="whatsapp"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
+          >
+            <Phone size={16} /> WhatsApp
           </TabsTrigger>
         </TabsList>
 
@@ -775,6 +820,79 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 </Card>
               </>
             )}
+          </div>
+        </TabsContent>
+
+        {/* WhatsApp Tab */}
+        <TabsContent value="whatsapp">
+          <div>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="flex items-center gap-2 m-0 text-base font-semibold text-gray-900">
+                <Phone size={18} className="text-green-500" /> WhatsApp Numbers
+              </h3>
+            </div>
+
+            {/* Connected Numbers */}
+            {waNumbers.length > 0 && (
+              <div className="space-y-2 mb-6">
+                {waNumbers.map((wn) => (
+                  <Card key={wn.id} className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                        <Phone size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 m-0">{wn.phone_number}</p>
+                        <p className="text-xs text-gray-400 m-0">Connected</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => disconnectWaNumber(wn.id)}>
+                      Disconnect
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Acquire Number */}
+            <Card>
+              <CardContent className="p-4">
+                <h4 className="text-sm font-medium text-gray-900 m-0 mb-3">Acquire a WhatsApp Number</h4>
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  <Input
+                    className="w-24"
+                    value={waCountry}
+                    onChange={(e) => setWaCountry(e.target.value.toUpperCase())}
+                    placeholder="US"
+                    maxLength={2}
+                  />
+                  <Button variant="outline" size="sm" onClick={fetchAvailableNumbers} disabled={waLoading}>
+                    {waLoading ? 'Searching...' : 'Search Numbers'}
+                  </Button>
+                </div>
+
+                {waAvailable.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-gray-400 m-0 mb-2">{waAvailable.length} numbers available</p>
+                    {waAvailable.map((n) => (
+                      <div key={n.phone_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 m-0">{n.phone_number}</p>
+                          {n.friendly_name && <p className="text-xs text-gray-400 m-0">{n.friendly_name}</p>}
+                        </div>
+                        <Button size="sm" onClick={() => connectWaNumber(n.phone_number)}>
+                          Connect
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {waAvailable.length === 0 && !waLoading && (
+                  <p className="text-sm text-gray-400 m-0">Enter a country code and search to find available numbers.</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
