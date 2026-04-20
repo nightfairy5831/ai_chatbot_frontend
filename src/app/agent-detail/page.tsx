@@ -876,7 +876,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                 <div className="flex gap-2 mb-4 items-end flex-wrap">
                   <div className="w-56">
                     <Label className="block text-xs font-medium text-gray-500 mb-1">Country</Label>
-                    <Select value={waCountry} onValueChange={(v) => setWaCountry(v)}>
+                    <Select value={waCountry} onValueChange={(v) => setWaCountry(v || 'US')}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select country..." />
                       </SelectTrigger>
