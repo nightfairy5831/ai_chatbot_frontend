@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2, Phone } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2, Phone, Globe, Search, PhoneOff } from 'lucide-react'
 import Request from '../../lib/request'
 
 import { Button } from '@/components/ui/button'
@@ -833,63 +833,111 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             </div>
 
             {/* Connected Numbers */}
-            {waNumbers.length > 0 && (
-              <div className="space-y-2 mb-6">
-                {waNumbers.map((wn) => (
-                  <Card key={wn.id} className="flex items-center justify-between px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
-                        <Phone size={16} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 m-0">{wn.phone_number}</p>
-                        <p className="text-xs text-gray-400 m-0">Connected</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => disconnectWaNumber(wn.id)}>
-                      Disconnect
-                    </Button>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* Acquire Number */}
-            <Card>
-              <CardContent className="p-4">
-                <h4 className="text-sm font-medium text-gray-900 m-0 mb-3">Acquire a WhatsApp Number</h4>
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  <Input
-                    className="w-24"
-                    value={waCountry}
-                    onChange={(e) => setWaCountry(e.target.value.toUpperCase())}
-                    placeholder="US"
-                    maxLength={2}
-                  />
-                  <Button variant="outline" size="sm" onClick={fetchAvailableNumbers} disabled={waLoading}>
-                    {waLoading ? 'Searching...' : 'Search Numbers'}
-                  </Button>
-                </div>
-
-                {waAvailable.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs text-gray-400 m-0 mb-2">{waAvailable.length} numbers available</p>
-                    {waAvailable.map((n) => (
-                      <div key={n.phone_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 m-0">{n.phone_number}</p>
-                          {n.friendly_name && <p className="text-xs text-gray-400 m-0">{n.friendly_name}</p>}
+            <Card className="mb-4">
+              <CardContent className="p-5">
+                <h4 className="text-sm font-semibold text-gray-900 m-0 mb-3">Connected Numbers</h4>
+                {waNumbers.length > 0 ? (
+                  <div className="space-y-2">
+                    {waNumbers.map((wn) => (
+                      <div key={wn.id} className="flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                            <Phone size={16} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 m-0">{wn.phone_number}</p>
+                            <p className="text-xs text-green-500 m-0 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
+                            </p>
+                          </div>
                         </div>
-                        <Button size="sm" onClick={() => connectWaNumber(n.phone_number)}>
-                          Connect
+                        <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => disconnectWaNumber(wn.id)}>
+                          <PhoneOff size={14} className="mr-1" /> Disconnect
                         </Button>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-400">
+                    <Phone size={24} className="mx-auto mb-2 text-gray-300" />
+                    <p className="text-sm m-0">No numbers connected yet.</p>
+                    <p className="text-xs m-0 mt-1">Search and connect a number below to enable WhatsApp messaging.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Acquire Number */}
+            <Card>
+              <CardContent className="p-5">
+                <h4 className="text-sm font-semibold text-gray-900 m-0 mb-3 flex items-center gap-2">
+                  <Globe size={16} className="text-blue-500" /> Acquire a WhatsApp Number
+                </h4>
+                <div className="flex gap-2 mb-4 items-end flex-wrap">
+                  <div className="w-56">
+                    <Label className="block text-xs font-medium text-gray-500 mb-1">Country</Label>
+                    <Select value={waCountry} onValueChange={(v) => setWaCountry(v)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select country..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="US">🇺🇸 United States (+1)</SelectItem>
+                        <SelectItem value="GB">🇬🇧 United Kingdom (+44)</SelectItem>
+                        <SelectItem value="CA">🇨🇦 Canada (+1)</SelectItem>
+                        <SelectItem value="AU">🇦🇺 Australia (+61)</SelectItem>
+                        <SelectItem value="DE">🇩🇪 Germany (+49)</SelectItem>
+                        <SelectItem value="FR">🇫🇷 France (+33)</SelectItem>
+                        <SelectItem value="ES">🇪🇸 Spain (+34)</SelectItem>
+                        <SelectItem value="IT">🇮🇹 Italy (+39)</SelectItem>
+                        <SelectItem value="BR">🇧🇷 Brazil (+55)</SelectItem>
+                        <SelectItem value="MX">🇲🇽 Mexico (+52)</SelectItem>
+                        <SelectItem value="JP">🇯🇵 Japan (+81)</SelectItem>
+                        <SelectItem value="KR">🇰🇷 South Korea (+82)</SelectItem>
+                        <SelectItem value="IN">🇮🇳 India (+91)</SelectItem>
+                        <SelectItem value="PE">🇵🇪 Peru (+51)</SelectItem>
+                        <SelectItem value="CL">🇨🇱 Chile (+56)</SelectItem>
+                        <SelectItem value="CO">🇨🇴 Colombia (+57)</SelectItem>
+                        <SelectItem value="AR">🇦🇷 Argentina (+54)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={fetchAvailableNumbers} disabled={waLoading}>
+                    {waLoading ? (
+                      <><span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" /> Searching...</>
+                    ) : (
+                      <><Search size={14} className="mr-1.5" /> Search Numbers</>
+                    )}
+                  </Button>
+                </div>
+
+                {waAvailable.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-xs font-medium text-gray-500 m-0">{waAvailable.length} numbers available</p>
+                    </div>
+                    <div className="space-y-1.5 max-h-72 overflow-y-auto">
+                      {waAvailable.map((n) => (
+                        <div key={n.phone_number} className="flex items-center justify-between py-2.5 px-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-200 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                              <Phone size={14} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 m-0">{n.phone_number}</p>
+                              {n.friendly_name && <p className="text-xs text-gray-400 m-0">{n.friendly_name}</p>}
+                            </div>
+                          </div>
+                          <Button size="sm" onClick={() => connectWaNumber(n.phone_number)}>
+                            Connect
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {waAvailable.length === 0 && !waLoading && (
-                  <p className="text-sm text-gray-400 m-0">Enter a country code and search to find available numbers.</p>
+                  <p className="text-sm text-gray-400 m-0 text-center py-2">Select a country and search to find available numbers.</p>
                 )}
               </CardContent>
             </Card>
