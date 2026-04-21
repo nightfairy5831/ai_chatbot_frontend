@@ -165,10 +165,16 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="profile">
-        <TabsList className="mb-4">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="subscription" className="gap-1.5"><CreditCard size={14} /> Subscription</TabsTrigger>
-          <TabsTrigger value="api">API Test</TabsTrigger>
+        <TabsList className="mb-4 w-full justify-start bg-transparent border-b border-gray-200 rounded-none h-auto p-0">
+          <TabsTrigger value="profile" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5">
+            <User size={14} /> Profile
+          </TabsTrigger>
+          <TabsTrigger value="subscription" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5">
+            <CreditCard size={14} /> Subscription
+          </TabsTrigger>
+          <TabsTrigger value="api" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5">
+            <Activity size={14} /> API Test
+          </TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -307,17 +313,21 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
                     { key: 'scale', name: 'Scale', price: 'R$ 797', messages: '20,000', features: ['Unlimited agents', 'Calendar booking', 'Priority support'], recommended: false },
                   ] as const).map((plan) => {
                     const isCurrent = subscription.plan === plan.key
+                    const isRecommended = plan.recommended && !isCurrent
                     return (
-                      <Card key={plan.key} className={`relative transition-all ${isCurrent ? 'ring-2 ring-brand' : 'hover:shadow-md'}`}>
-                        {plan.recommended && !isCurrent && (
-                          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                            <Badge className="bg-brand text-white border-0 text-[10px] px-2.5">Recommended</Badge>
-                          </div>
-                        )}
+                      <Card key={plan.key} className={`relative transition-all ${isCurrent ? 'ring-2 ring-brand' : isRecommended ? 'ring-2 ring-brand/40 bg-brand-light/30' : 'hover:shadow-md'}`}>
                         <CardContent className="p-4">
-                          <div className="mb-3">
+                          <div className="flex items-center justify-between mb-3">
                             <h4 className="text-sm font-bold text-gray-900 m-0">{plan.name}</h4>
-                            <div className="flex items-baseline gap-1 mt-1">
+                            {isRecommended && (
+                              <Badge className="bg-brand text-white border-0 text-[10px] px-2">Recommended</Badge>
+                            )}
+                            {isCurrent && (
+                              <Badge className="bg-brand/10 text-brand border-0 text-[10px] px-2">Current</Badge>
+                            )}
+                          </div>
+                          <div className="mb-3">
+                            <div className="flex items-baseline gap-1">
                               <span className="text-2xl font-bold text-gray-900">{plan.price}</span>
                               <span className="text-xs text-gray-400">/month</span>
                             </div>
