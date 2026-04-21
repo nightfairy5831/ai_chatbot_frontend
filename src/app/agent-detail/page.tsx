@@ -744,7 +744,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                               key={day}
                               className={`relative flex items-center justify-center py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors duration-150 ${
                                 isSelected
-                                  ? 'bg-brand-light0 text-white'
+                                  ? 'bg-brand text-white'
                                   : isToday
                                     ? 'bg-brand-light text-brand-dark font-bold'
                                     : dayBookings.length > 0
@@ -755,7 +755,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                             >
                               {day}
                               {dayBookings.length > 0 && (
-                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand-light0" />
+                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand" />
                               )}
                             </div>
                           )
