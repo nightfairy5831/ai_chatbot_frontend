@@ -142,7 +142,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
   const fetchCalendarConnection = async () => {
     try {
       const data = await Request.Get(`/calendar/agents/${agentId}/connection`)
-      setCalendarConnected(!!data)
+      const connected = !!data
+      setCalendarConnected(connected)
+      if (connected) fetchBookings()
     } catch {
       setCalendarConnected(false)
     }
