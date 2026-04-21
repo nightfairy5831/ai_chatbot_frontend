@@ -47,7 +47,7 @@ export default function LogsTab({ onLogout }: { onLogout: () => void }) {
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-gray-400">{l.username}</span>
                     <span className="text-xs text-gray-200">·</span>
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-600 border border-blue-100 text-xs px-2 py-0 rounded-full">{l.agent_name}</Badge>
+                    <Badge variant="secondary" className="bg-brand-light text-brand-dark border border-brand-lighter text-xs px-2 py-0 rounded-full">{l.agent_name}</Badge>
                   </div>
                 </div>
                 <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap pt-0.5">

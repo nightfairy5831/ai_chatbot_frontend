@@ -384,31 +384,31 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
         <TabsList className="mb-4 w-full justify-start bg-transparent border-b border-gray-200 rounded-none h-auto p-0 overflow-x-auto overflow-y-hidden">
           <TabsTrigger
             value="config"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
           >
             Configuration
           </TabsTrigger>
           <TabsTrigger
             value="products"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
           >
             Products
           </TabsTrigger>
           <TabsTrigger
             value="prompt"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0"
           >
             Prompt & Test
           </TabsTrigger>
           <TabsTrigger
             value="calendar"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
           >
             <Calendar size={16} /> Calendar
           </TabsTrigger>
           <TabsTrigger
             value="whatsapp"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:font-semibold px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 shrink-0 gap-1.5"
           >
             <Phone size={16} /> WhatsApp
           </TabsTrigger>
@@ -490,7 +490,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                   <div className="border border-dashed border-gray-200 rounded-lg p-4 text-center bg-gray-50/50">
                     <Upload size={18} className="text-gray-300 mb-1.5 mx-auto" />
                     <p className="text-xs text-gray-400 m-0 mb-2">Upload a PDF for special instructions</p>
-                    <Label className={`inline-flex items-center gap-1.5 py-1.5 px-4 rounded-full text-xs font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors ${pdfUploading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
+                    <Label className={`inline-flex items-center gap-1.5 py-1.5 px-4 rounded-full text-xs font-medium bg-brand text-white hover:bg-brand-dark transition-colors ${pdfUploading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
                       {pdfUploading ? (
                         <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
@@ -572,7 +572,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
               <div className="divide-y divide-gray-50">
                 {products.map((p) => (
                   <div key={p.id} className="group flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
                       <Package size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -586,14 +586,14 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                       <div className="flex items-center gap-2 mt-0.5">
                         {p.description && <p className="text-xs text-gray-400 m-0 truncate">{p.description}</p>}
                         {p.purchase_link && (
-                          <a href={p.purchase_link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 inline-flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <a href={p.purchase_link} target="_blank" rel="noopener noreferrer" className="text-xs text-brand inline-flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                             <Link2 size={10} /> Link
                           </a>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-blue-600" onClick={() => openProductEdit(p)}><Pencil size={13} /></Button>
+                      <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" onClick={() => openProductEdit(p)}><Pencil size={13} /></Button>
                       <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" onClick={() => deleteProduct(p)}><Trash2 size={13} /></Button>
                     </div>
                   </div>
@@ -609,7 +609,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           <Card className="mb-4">
             <CardContent className="p-4">
               <h3 className="flex items-center gap-2 m-0 mb-3 text-sm font-semibold text-gray-900">
-                <MessageSquare size={16} className="text-blue-500" /> Test Chat
+                <MessageSquare size={16} className="text-brand" /> Test Chat
               </h3>
               <div className="flex gap-2 mb-3">
                 <Input
@@ -628,8 +628,8 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                   <p className="text-xs text-gray-400 text-center py-6 m-0">Send a message to test your agent</p>
                 )}
                 {chatHistory.map((msg, i) => (
-                  <div key={i} className={`mt-2 py-2 px-3 rounded-lg ${msg.role === 'user' ? 'bg-blue-50' : 'bg-green-50'}`}>
-                    <p className={`text-xs font-semibold mb-0.5 ${msg.role === 'user' ? 'text-blue-600' : 'text-green-600'}`}>
+                  <div key={i} className={`mt-2 py-2 px-3 rounded-lg ${msg.role === 'user' ? 'bg-brand-light' : 'bg-green-50'}`}>
+                    <p className={`text-xs font-semibold mb-0.5 ${msg.role === 'user' ? 'text-brand-dark' : 'text-green-600'}`}>
                       {msg.role === 'user' ? 'You' : 'AI'}
                     </p>
                     <p className="text-sm m-0 whitespace-pre-wrap break-words text-gray-800">{msg.content}</p>
@@ -646,7 +646,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <h3 className="flex items-center gap-2 m-0 text-sm font-semibold text-gray-900">
-                  <Sparkles size={16} className="text-blue-500" /> System Prompt
+                  <Sparkles size={16} className="text-brand" /> System Prompt
                 </h3>
                 <Button size="sm" variant="outline" onClick={generatePrompt} disabled={promptLoading}>
                   {promptLoading ? '...' : <><Sparkles size={14} /> Generate</>}
@@ -668,7 +668,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
           <div className="max-w-full">
             <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
               <h3 className="m-0 flex items-center gap-2 text-base font-semibold text-gray-900">
-                <Calendar size={18} className="text-blue-500" /> Google Calendar
+                <Calendar size={18} className="text-brand" /> Google Calendar
               </h3>
               {calendarConnected ? (
                 <div className="flex gap-2">
@@ -742,9 +742,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                               key={day}
                               className={`relative flex items-center justify-center py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors duration-150 ${
                                 isSelected
-                                  ? 'bg-blue-500 text-white'
+                                  ? 'bg-brand-light0 text-white'
                                   : isToday
-                                    ? 'bg-blue-50 text-blue-600 font-bold'
+                                    ? 'bg-brand-light text-brand-dark font-bold'
                                     : dayBookings.length > 0
                                       ? 'bg-green-50 text-gray-700'
                                       : 'text-gray-700 hover:bg-gray-100'
@@ -753,7 +753,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                             >
                               {day}
                               {dayBookings.length > 0 && (
-                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand-light0" />
                               )}
                             </div>
                           )
@@ -871,7 +871,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
             <Card>
               <CardContent className="p-5">
                 <h4 className="text-sm font-semibold text-gray-900 m-0 mb-3 flex items-center gap-2">
-                  <Globe size={16} className="text-blue-500" /> Acquire a WhatsApp Number
+                  <Globe size={16} className="text-brand" /> Acquire a WhatsApp Number
                 </h4>
                 <div className="flex gap-2 mb-4 items-end flex-wrap">
                   <div className="w-56">
@@ -919,7 +919,7 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
                       {waAvailable.map((n) => (
                         <div key={n.phone_number} className="flex items-center justify-between py-2.5 px-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-200 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center">
                               <Phone size={14} />
                             </div>
                             <div>

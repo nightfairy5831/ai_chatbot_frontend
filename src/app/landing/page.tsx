@@ -76,8 +76,35 @@ function HeroSection({ onStart }: { onStart: () => void }) {
   )
 }
 
+const SEARCH_ITEMS = [
+  { title: 'Starter', category: 'Plano', description: 'Para pequenos negócios — R$ 197/mês', keywords: 'starter plano 500 leads 1 persona crm remarketing relatórios básico pequeno preço barato', action: 'pricing' as const },
+  { title: 'Growth', category: 'Plano', description: 'Para empresas em expansão — R$ 397/mês', keywords: 'growth plano 2500 leads 3 personas aprendizado insights sugestão resposta recomendado médio', action: 'pricing' as const },
+  { title: 'Scale', category: 'Plano', description: 'Alto volume e máxima performance — R$ 797/mês', keywords: 'scale plano ilimitado leads personas scripts previsão conversão suporte prioritário enterprise grande', action: 'pricing' as const },
+  { title: 'Chatbot com IA', category: 'Recurso', description: 'Crie agentes de IA personalizados para sua empresa', keywords: 'chatbot ia inteligência artificial agente bot automação atendimento', action: 'login' as const },
+  { title: 'Integração WhatsApp', category: 'Recurso', description: 'Conecte um número WhatsApp ao seu agente de IA', keywords: 'whatsapp mensagem telefone número twilio integração canal', action: 'login' as const },
+  { title: 'Google Calendar', category: 'Recurso', description: 'Agendamento automático de reuniões e consultas', keywords: 'calendar calendário agendamento reunião consulta horário agenda google', action: 'login' as const },
+  { title: 'Relatórios e Analytics', category: 'Recurso', description: 'Acompanhe métricas de atendimento e conversão', keywords: 'relatório analytics métricas dashboard estatísticas dados conversão', action: 'login' as const },
+  { title: 'Múltiplas Personas', category: 'Recurso', description: 'Configure diferentes personalidades para cada agente', keywords: 'persona personalidade tom profissional amigável casual formal configuração', action: 'login' as const },
+  { title: 'Upload de PDF', category: 'Recurso', description: 'Treine o agente com documentos da sua empresa', keywords: 'pdf upload documento treinamento arquivo instrução conhecimento', action: 'login' as const },
+]
+
 function PlatformSection({ onShowPricing, onGoToLogin, onBackToHero }: { onShowPricing: () => void; onGoToLogin: () => void; onBackToHero: () => void }) {
   const [searchValue, setSearchValue] = useState('')
+  const [showResults, setShowResults] = useState(false)
+
+  const filtered = searchValue.trim().length > 0
+    ? SEARCH_ITEMS.filter((item) => {
+        const q = searchValue.toLowerCase()
+        return item.title.toLowerCase().includes(q) || item.keywords.includes(q) || item.description.toLowerCase().includes(q)
+      })
+    : []
+
+  const handleSelect = (item: typeof SEARCH_ITEMS[0]) => {
+    setSearchValue('')
+    setShowResults(false)
+    if (item.action === 'pricing') onShowPricing()
+    else onGoToLogin()
+  }
 
   return (
     <div className="fixed inset-0 flex flex-col bg-gray-50 overflow-y-auto">
@@ -101,26 +128,57 @@ function PlatformSection({ onShowPricing, onGoToLogin, onBackToHero }: { onShowP
         </span>
 
         {/* Search bar */}
-        <div className="flex items-center w-full max-w-md py-2 px-4 border border-gray-200 rounded-full bg-white shadow-sm gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input
-            className="flex-1 border-none outline-none bg-transparent text-sm text-gray-700 py-1"
-            type="text"
-            placeholder="Digite sua mensagem..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          {searchValue && (
-            <button
-              className="bg-transparent border-none p-0 text-gray-400 cursor-pointer hover:text-gray-600"
-              onClick={() => setSearchValue('')}
-            >
-              &times;
-            </button>
+        <div className="relative w-full max-w-md">
+          <div className="flex items-center w-full py-2 px-4 border border-gray-200 rounded-full bg-white shadow-sm gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input
+              className="flex-1 border-none outline-none bg-transparent text-sm text-gray-700 py-1"
+              type="text"
+              placeholder="Pesquise planos, recursos, integrações..."
+              value={searchValue}
+              onChange={(e) => { setSearchValue(e.target.value); setShowResults(true) }}
+              onFocus={() => setShowResults(true)}
+            />
+            {searchValue && (
+              <button
+                className="bg-transparent border-none p-0 text-gray-400 cursor-pointer hover:text-gray-600"
+                onClick={() => { setSearchValue(''); setShowResults(false) }}
+              >
+                &times;
+              </button>
+            )}
+            <Button size="sm" className="rounded-full text-xs bg-[#a8558f] hover:bg-[#934a7d] h-7 px-3">
+              Buscar
+            </Button>
+          </div>
+
+          {/* Search results dropdown */}
+          {showResults && searchValue.trim().length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
+              {filtered.length > 0 ? (
+                filtered.map((item) => (
+                  <button
+                    key={item.title}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer bg-transparent border-none border-b border-b-gray-100 last:border-b-0 flex items-center gap-3"
+                    onClick={() => handleSelect(item)}
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#a8558f] bg-[#a8558f]/10 px-2 py-0.5 rounded-full shrink-0">
+                      {item.category}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 m-0">{item.title}</p>
+                      <p className="text-xs text-gray-400 m-0 truncate">{item.description}</p>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-6 text-center">
+                  <p className="text-sm text-gray-400 m-0">Nenhum resultado para &quot;{searchValue}&quot;</p>
+                  <p className="text-xs text-gray-300 m-0 mt-1">Tente: plano, whatsapp, chatbot, agendamento...</p>
+                </div>
+              )}
+            </div>
           )}
-          <Button size="sm" className="rounded-full text-xs bg-[#a8558f] hover:bg-[#934a7d] h-7 px-3">
-            Modo IA
-          </Button>
         </div>
 
         {/* Action buttons */}

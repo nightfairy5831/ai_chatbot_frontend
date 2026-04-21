@@ -139,7 +139,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
           <Card>
             <CardContent className="p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
-                <User size={16} className="text-blue-500" /> Profile
+                <User size={16} className="text-brand" /> Profile
               </h3>
               <form onSubmit={handleProfileSave}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -165,7 +165,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
           <Card>
             <CardContent className="p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
-                <Lock size={16} className="text-blue-500" /> Change Password
+                <Lock size={16} className="text-brand" /> Change Password
               </h3>
               <form onSubmit={handlePasswordChange}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
@@ -215,7 +215,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
 
               {healthLoading && (
                 <div className="flex items-center justify-center gap-2.5 py-4 text-muted-foreground text-sm">
-                  <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-gray-200 border-t-brand rounded-full animate-spin" />
                   Checking API status...
                 </div>
               )}

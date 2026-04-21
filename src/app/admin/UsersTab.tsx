@@ -85,7 +85,7 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
                     <p className="text-xs text-gray-400 m-0">{u.email}</p>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={u.role === 'admin' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-gray-50 text-gray-500 border border-gray-100'}>
+                    <Badge variant="secondary" className={u.role === 'admin' ? 'bg-brand-light text-brand-dark border border-brand-lighter' : 'bg-gray-50 text-gray-500 border border-gray-100'}>
                       {u.role}
                     </Badge>
                   </TableCell>
@@ -99,7 +99,7 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
                   <TableCell>
                     {u.role !== 'admin' && (
                       <div className="flex gap-0.5 justify-end">
-                        <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-blue-600" title={u.is_active ? 'Deactivate' : 'Activate'} onClick={() => toggleUserActive(u)}>
+                        <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title={u.is_active ? 'Deactivate' : 'Activate'} onClick={() => toggleUserActive(u)}>
                           {u.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
                         </Button>
                         <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={() => deleteUser(u)}>

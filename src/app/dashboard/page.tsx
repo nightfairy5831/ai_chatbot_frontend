@@ -168,7 +168,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
                   className="group flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => onOpenAgent(agent.id)}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
                     <Bot size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -176,7 +176,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
                     {agent.description && <p className="text-xs text-gray-400 m-0 truncate">{agent.description}</p>}
                   </div>
                   <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-blue-600" title="Edit" onClick={(e) => openEditForm(e, agent)}>
+                    <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title="Edit" onClick={(e) => openEditForm(e, agent)}>
                       <Pencil size={14} />
                     </Button>
                     <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={(e) => handleDelete(e, agent)}>
@@ -212,7 +212,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
                     <p className="text-sm text-gray-800 font-medium m-0 truncate">{log.question}</p>
                     <p className="text-xs text-gray-500 m-0 mt-0.5">{log.agent_name}</p>
                   </div>
-                  <Badge variant="secondary" className={`shrink-0 rounded-full text-xs px-2.5 py-0.5 ${log.source_channel === 'whatsapp' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                  <Badge variant="secondary" className={`shrink-0 rounded-full text-xs px-2.5 py-0.5 ${log.source_channel === 'whatsapp' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-brand-light text-brand-dark border border-brand-lighter'}`}>
                     {log.source_channel}
                   </Badge>
                   <span className="text-xs text-gray-500 shrink-0 text-right whitespace-nowrap">
@@ -230,7 +230,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
 
 function StatCard({ icon, color, value, label, isText }: { icon: React.ReactNode; color: string; value: string | number; label: string; isText?: boolean }) {
   const colorMap: Record<string, string> = {
-    blue: 'bg-blue-500/10 text-blue-500',
+    blue: 'bg-brand/10 text-brand',
     emerald: 'bg-emerald-500/10 text-emerald-500',
     violet: 'bg-violet-500/10 text-violet-500',
     amber: 'bg-amber-500/10 text-amber-500',

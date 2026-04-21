@@ -183,7 +183,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
             <Card>
               <CardContent className="p-4">
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3">
-                  <TrendingUp size={16} className="text-blue-500" /> Live Agent Test
+                  <TrendingUp size={16} className="text-brand" /> Live Agent Test
                 </h3>
                 <div className="flex gap-2 mb-2">
                   <Select value={testAgentId ? String(testAgentId) : ''} onValueChange={(v) => setTestAgentId(v ? Number(v) : null)}>
@@ -228,7 +228,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
 
 function StatCard({ icon, color, value, label }: { icon: React.ReactNode; color: string; value: number; label: string }) {
   const colors: Record<string, string> = {
-    blue: 'bg-blue-500/10 text-blue-500',
+    blue: 'bg-brand/10 text-brand',
     emerald: 'bg-emerald-500/10 text-emerald-500',
     amber: 'bg-amber-500/10 text-amber-500',
     violet: 'bg-violet-500/10 text-violet-500',
@@ -250,7 +250,7 @@ function ChartCard({ title, icon, children }: { title: string; icon: React.React
   return (
     <Card>
       <CardContent className="p-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3 [&>svg]:text-blue-500">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 m-0 mb-3 [&>svg]:text-brand">
           {icon} {title}
         </h3>
         {children}

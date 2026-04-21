@@ -70,7 +70,7 @@ export default function AgentsTab({ onLogout, onTestAgent }: { onLogout: () => v
                   <TableCell className="text-sm text-gray-500">{a.question_count}</TableCell>
                   <TableCell>
                     <div className="flex gap-0.5 justify-end">
-                      <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-blue-600" title="Test" onClick={() => onTestAgent?.(a.id)}>
+                      <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title="Test" onClick={() => onTestAgent?.(a.id)}>
                         <MessageSquare size={14} />
                       </Button>
                       <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={() => deleteAgent(a)}>
