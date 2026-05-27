@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Plus, Pencil, Trash2, Package, Sparkles, Send, MessageSquare, Upload, X, Calendar, Link2, Phone, Globe, Search, PhoneOff } from 'lucide-react'
-import Request from '../../lib/request'
+import Request, { showToast } from '../../lib/request'
 
 import { Button } from '@/components/ui/button'
 import { Loading } from '@/components/ui/loading'
@@ -119,7 +119,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
       await Request.Post(`/whatsapp/agents/${agentId}/connect`, { phone_number: phoneNumber, agent_id: agentId })
       await fetchWaNumbers()
       setWaAvailable([])
-    } catch { /* ignore */ }
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || 'Could not connect this number')
+    }
   }
 
   const disconnectWaNumber = async (numberId: number) => {
@@ -154,7 +156,9 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     try {
       const data = await Request.Get(`/calendar/connect/${agentId}`)
       window.open(data.auth_url, '_blank')
-    } catch { /* ignore */ }
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || 'Could not start Google Calendar connection')
+    }
   }
 
   const disconnectCalendar = async () => {
