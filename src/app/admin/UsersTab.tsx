@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, UserCheck, UserX, Search } from 'lucide-react'
+import { Trash2, UserCheck, UserX, Search, ShieldCheck, ShieldOff } from 'lucide-react'
 import Request from '../../lib/request'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,16 +17,27 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
+  const [meId, setMeId] = useState<number | null>(null)
 
   const fetchUsers = async () => {
     try { const data = await Request.Get('/admin/users?search='); setUsers(data) }
     catch (err: any) { if (err.response?.status === 401) onLogout() }
   }
 
-  useEffect(() => { fetchUsers() }, [])
+  useEffect(() => {
+    fetchUsers()
+    Request.Get('/auth/me').then((d) => setMeId(d.id)).catch(() => {})
+  }, [])
 
   const toggleUserActive = async (user: AdminUser) => {
     try { await Request.Patch(`/admin/users/${user.id}`, { is_active: !user.is_active }); fetchUsers() }
+    catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
+  }
+
+  const toggleUserRole = async (user: AdminUser) => {
+    const role = user.role === 'admin' ? 'client' : 'admin'
+    if (!confirm(`Change ${user.username} to ${role}?`)) return
+    try { await Request.Patch(`/admin/users/${user.id}`, { role }); fetchUsers() }
     catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
   }
 
@@ -97,16 +108,23 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
                   <TableCell className="text-sm text-gray-500">{u.agent_count}</TableCell>
                   <TableCell className="text-xs text-gray-400 text-right">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</TableCell>
                   <TableCell>
-                    {u.role !== 'admin' && (
-                      <div className="flex gap-0.5 justify-end">
-                        <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title={u.is_active ? 'Deactivate' : 'Activate'} onClick={() => toggleUserActive(u)}>
-                          {u.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
+                    <div className="flex gap-0.5 justify-end">
+                      {u.id !== meId && (
+                        <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title={u.role === 'admin' ? 'Make client' : 'Make admin'} onClick={() => toggleUserRole(u)}>
+                          {u.role === 'admin' ? <ShieldOff size={14} /> : <ShieldCheck size={14} />}
                         </Button>
-                        <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={() => deleteUser(u)}>
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    )}
+                      )}
+                      {u.role !== 'admin' && (
+                        <>
+                          <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-brand-dark" title={u.is_active ? 'Deactivate' : 'Activate'} onClick={() => toggleUserActive(u)}>
+                            {u.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
+                          </Button>
+                          <Button variant="ghost" size="icon" className="w-7 h-7 text-gray-400 hover:text-red-600" title="Delete" onClick={() => deleteUser(u)}>
+                            <Trash2 size={14} />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

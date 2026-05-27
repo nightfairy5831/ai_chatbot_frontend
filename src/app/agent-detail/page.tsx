@@ -215,6 +215,15 @@ function AgentDetail({ agentId, onBack, onLogout }: { agentId: number; onBack: (
     fetchWaNumbers()
   }, [agentId])
 
+  // Refresh calendar state when the OAuth popup reports a successful connection.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.data === 'calendar-connected') fetchCalendarConnection()
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [agentId])
+
   // Config handlers
   const saveConfig = async () => {
     setConfigSaving(true)
