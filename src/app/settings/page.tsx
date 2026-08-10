@@ -306,8 +306,8 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {([
                     { key: 'starter', name: 'Starter', price: 'R$ 197', messages: '1,000', features: ['1 agent', 'Website chat', 'Basic reports'], recommended: false },
-                    { key: 'growth', name: 'Growth', price: 'R$ 397', messages: '5,000', features: ['3 agents', 'WhatsApp integration', 'Google Calendar booking'], recommended: true },
-                    { key: 'scale', name: 'Scale', price: 'R$ 797', messages: '20,000', features: ['Unlimited agents', 'Up to 10 numbers', 'Priority support'], recommended: false },
+                    { key: 'growth', name: 'Growth', price: 'R$ 397', messages: '5,000', features: ['3 agents', 'WhatsApp — your own number', 'Google Calendar booking'], recommended: true },
+                    { key: 'scale', name: 'Scale', price: 'R$ 797', messages: '20,000', features: ['Unlimited agents', 'Unlimited numbers', 'Priority support'], recommended: false },
                   ] as const).map((plan) => {
                     const isCurrent = subscription.plan === plan.key
                     const isRecommended = plan.recommended && !isCurrent
