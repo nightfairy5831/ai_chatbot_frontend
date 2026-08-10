@@ -1,191 +1,152 @@
-import { useState, useEffect } from 'react'
-import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity, Menu, X, Palette, Plug } from 'lucide-react'
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom'
+import Request from './lib/request'
+import { Loading } from '@/components/ui/loading'
+import AppLayout from './components/AppLayout'
 import LandingPage from './app/landing/page'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
-import Dashboard from './app/dashboard/page'
-import AgentDetail from './app/agent-detail/page'
-import Settings from './app/settings/page'
-import Admin, { type AdminTab } from './app/admin/page'
-import Request from './lib/request'
+import ForgotPassword from './app/auth/forgot-password/page'
+import ResetPassword from './app/auth/reset-password/page'
 
-function App() {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
-  const [showLanding, setShowLanding] = useState(true)
-  const [authPage, setAuthPage] = useState<'login' | 'register'>('login')
-  const [activePage, setActivePage] = useState<'dashboard' | 'agent-detail' | 'settings' | 'admin-dashboard' | 'admin-users' | 'admin-agents' | 'admin-logs' | 'admin-integrations'>('dashboard')
-  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null)
-  const [testAgentId, setTestAgentId] = useState<number | null>(null)
-  const [username, setUsername] = useState<string | null>(null)
-  const [userRole, setUserRole] = useState<string | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [theme, setTheme] = useState<'blue' | 'purple'>(() => {
-    return (localStorage.getItem('theme') as 'blue' | 'purple') || 'blue'
-  })
+// Admin and agent screens are the heaviest part of the bundle (charts, tabs) and
+// most sessions never open them — load them on demand.
+const Dashboard = lazy(() => import('./app/dashboard/page'))
+const AgentDetail = lazy(() => import('./app/agent-detail/page'))
+const Settings = lazy(() => import('./app/settings/page'))
+const Admin = lazy(() => import('./app/admin/page'))
 
-  useEffect(() => {
-    if (theme === 'purple') {
-      document.documentElement.setAttribute('data-theme', 'purple')
-    } else {
-      document.documentElement.removeAttribute('data-theme')
-    }
-    localStorage.setItem('theme', theme)
-  }, [theme])
+export interface SessionUser {
+  id: number
+  username: string
+  role: string
+  email: string
+  plan: string
+  email_verified: boolean
+}
 
-  const toggleTheme = () => setTheme(prev => prev === 'blue' ? 'purple' : 'blue')
+function useSession() {
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'))
+  const [user, setUser] = useState<SessionUser | null>(null)
+  const [loading, setLoading] = useState(!!token)
 
-  useEffect(() => {
-    if (token) {
-      Request.Get('/auth/me')
-        .then((data) => {
-          setUsername(data.username)
-          setUserRole(data.role)
-          if (data.role === 'admin') setActivePage('admin-dashboard')
-        })
-        .catch(() => { setUsername(null); setUserRole(null) })
-    }
-  }, [token])
-
-  const handleAuth = (newToken: string) => {
-    localStorage.setItem('token', newToken)
-    setToken(newToken)
-  }
-
-  const handleLogout = () => {
+  const signOut = useCallback(() => {
     localStorage.removeItem('token')
     setToken(null)
-    setUsername(null)
-    setUserRole(null)
-    setShowLanding(true)
-    setAuthPage('login')
-    setActivePage('dashboard')
-    setSelectedAgentId(null)
-  }
-
-  useEffect(() => {
-    // request.ts clears the stored token on a 401 and fires this event.
-    const onExpired = () => handleLogout()
-    window.addEventListener('auth:expired', onExpired)
-    return () => window.removeEventListener('auth:expired', onExpired)
+    setUser(null)
+    setLoading(false)
   }, [])
 
-  const handleOpenAgent = (agentId: number) => {
-    setSelectedAgentId(agentId)
-    setActivePage('agent-detail')
-  }
+  const signIn = useCallback((newToken: string) => {
+    localStorage.setItem('token', newToken)
+    setToken(newToken)
+    setLoading(true)
+  }, [])
 
-  const handleBackToDashboard = () => {
-    setSelectedAgentId(null)
-    setActivePage('dashboard')
-  }
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    Request.Get('/auth/me')
+      .then((data) => { if (!cancelled) setUser(data) })
+      .catch(() => { if (!cancelled) setUser(null) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [token])
 
-  if (!token) {
-    if (showLanding) return <LandingPage onGoToLogin={() => setShowLanding(false)} />
-    if (authPage === 'register') return <Register onRegister={handleAuth} onSwitchToLogin={() => setAuthPage('login')} />
-    return <Login onLogin={handleAuth} onSwitchToRegister={() => setAuthPage('register')} onBackToLanding={() => setShowLanding(true)} />
-  }
+  useEffect(() => {
+    const onExpired = () => signOut()
+    window.addEventListener('auth:expired', onExpired)
+    return () => window.removeEventListener('auth:expired', onExpired)
+  }, [signOut])
 
+  // Keep a working session alive rather than dropping the user at the hour mark.
+  useEffect(() => {
+    if (!token) return
+    const id = setInterval(() => {
+      Request.Post('/auth/refresh', {})
+        .then((data) => { if (data?.access_token) { localStorage.setItem('token', data.access_token) } })
+        .catch(() => { /* the 401 interceptor handles a dead session */ })
+    }, 30 * 60 * 1000)
+    return () => clearInterval(id)
+  }, [token])
+
+  return { token, user, loading, signIn, signOut, setUser }
+}
+
+function AuthedRoutes({ user, onSignOut, onUserChange }: {
+  user: SessionUser
+  onSignOut: () => void
+  onUserChange: (u: SessionUser) => void
+}) {
   return (
-    <div className="min-h-screen">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 w-64 h-screen bg-white border-r border-gray-200 flex flex-col z-50 overflow-y-auto transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <span className="text-xl font-medium tracking-tight">
-            <span className="text-gray-800">Lead</span>
-            <span className="text-[#a8558f]">Lab</span>
-          </span>
-          <button onClick={toggleTheme} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-100" title="Switch theme">
-            <Palette size={15} />
-            <span className={`w-2.5 h-2.5 rounded-full ${theme === 'blue' ? 'bg-[#3b82f6]' : 'bg-[#a8558f]'}`} />
-          </button>
-        </div>
-
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {userRole === 'admin' ? (
-            <>
-              <NavItem active={activePage === 'admin-dashboard'} icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => { setActivePage('admin-dashboard'); setSidebarOpen(false) }} />
-              <NavItem active={activePage === 'admin-users'} icon={<Users size={20} />} label="Users" onClick={() => { setActivePage('admin-users'); setSidebarOpen(false) }} />
-              <NavItem active={activePage === 'admin-agents'} icon={<Bot size={20} />} label="Agents" onClick={() => { setActivePage('admin-agents'); setSidebarOpen(false) }} />
-              <NavItem active={activePage === 'admin-logs'} icon={<Activity size={20} />} label="Activity Logs" onClick={() => { setActivePage('admin-logs'); setSidebarOpen(false) }} />
-              <NavItem active={activePage === 'admin-integrations'} icon={<Plug size={20} />} label="Integrations" onClick={() => { setActivePage('admin-integrations'); setSidebarOpen(false) }} />
-            </>
-          ) : (
-            <>
-              <NavItem active={activePage === 'dashboard' || activePage === 'agent-detail'} icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => { handleBackToDashboard(); setSidebarOpen(false) }} />
-              <NavItem active={activePage === 'settings'} icon={<SettingsIcon size={20} />} label="Settings" onClick={() => { setActivePage('settings'); setSidebarOpen(false) }} />
-            </>
-          )}
-        </nav>
-
-        <div className="px-4 py-4 border-t border-gray-100">
-          {username && (
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center text-sm font-semibold">
-                {username[0].toUpperCase()}
-              </div>
-              <span className="text-sm text-gray-600 truncate">{username}</span>
-            </div>
-          )}
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors w-full px-2 py-1.5 rounded-lg hover:bg-red-50">
-            <LogOut size={18} />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="md:ml-64 min-h-screen bg-gray-50 text-gray-800">
-        {/* Mobile header */}
-        <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 md:hidden">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100">
-              {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-            <span className="text-lg font-medium tracking-tight">
-              <span className="text-gray-800">Lead</span>
-              <span className="text-[#a8558f]">Lab</span>
-            </span>
-          </div>
-          <button onClick={toggleTheme} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-100" title="Switch theme">
-            <Palette size={15} />
-            <span className={`w-2.5 h-2.5 rounded-full ${theme === 'blue' ? 'bg-[#3b82f6]' : 'bg-[#a8558f]'}`} />
-          </button>
-        </div>
-
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-          {activePage === 'dashboard' && <Dashboard onLogout={handleLogout} onOpenAgent={handleOpenAgent} />}
-          {activePage === 'agent-detail' && selectedAgentId && (
-            <AgentDetail agentId={selectedAgentId} onBack={handleBackToDashboard} onLogout={handleLogout} />
-          )}
-          {activePage.startsWith('admin-') && (
-            <Admin
-              onLogout={handleLogout}
-              activeTab={activePage.replace('admin-', '') as AdminTab}
-              testAgentId={testAgentId}
-              onTestAgent={(agentId) => { setTestAgentId(agentId); setActivePage('admin-dashboard') }}
-            />
-          )}
-          {activePage === 'settings' && <Settings onLogout={handleLogout} onUsernameChange={setUsername} />}
-        </div>
-      </main>
-    </div>
+    <AppLayout user={user} onSignOut={onSignOut}>
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route path="/" element={<Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />} />
+          <Route path="/dashboard" element={<DashboardRoute />} />
+          <Route path="/agents/:agentId" element={<AgentRoute onSignOut={onSignOut} />} />
+          <Route path="/settings" element={<Settings onLogout={onSignOut} onUsernameChange={(name: string) => onUserChange({ ...user, username: name })} />} />
+          <Route path="/admin" element={<AdminRoute tab="dashboard" onSignOut={onSignOut} isAdmin={user.role === 'admin'} />} />
+          <Route path="/admin/users" element={<AdminRoute tab="users" onSignOut={onSignOut} isAdmin={user.role === 'admin'} />} />
+          <Route path="/admin/agents" element={<AdminRoute tab="agents" onSignOut={onSignOut} isAdmin={user.role === 'admin'} />} />
+          <Route path="/admin/logs" element={<AdminRoute tab="logs" onSignOut={onSignOut} isAdmin={user.role === 'admin'} />} />
+          <Route path="/admin/integrations" element={<AdminRoute tab="integrations" onSignOut={onSignOut} isAdmin={user.role === 'admin'} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </AppLayout>
   )
 }
 
-function NavItem({ active, icon, label, onClick }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void }) {
+function DashboardRoute() {
+  const navigate = useNavigate()
+  return <Dashboard onLogout={() => window.dispatchEvent(new Event('auth:expired'))} onOpenAgent={(id: number) => navigate(`/agents/${id}`)} />
+}
+
+function AgentRoute({ onSignOut }: { onSignOut: () => void }) {
+  const { agentId } = useParams()
+  const navigate = useNavigate()
+  const id = Number(agentId)
+  if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
+  return <AgentDetail agentId={id} onBack={() => navigate('/dashboard')} onLogout={onSignOut} />
+}
+
+function AdminRoute({ tab, onSignOut, isAdmin }: { tab: 'dashboard' | 'users' | 'agents' | 'logs' | 'integrations'; onSignOut: () => void; isAdmin: boolean }) {
+  const navigate = useNavigate()
+  if (!isAdmin) return <Navigate to="/dashboard" replace />
+  return <Admin onLogout={onSignOut} activeTab={tab} onTestAgent={() => navigate('/admin')} />
+}
+
+function PublicRoutes({ onSignIn }: { onSignIn: (token: string) => void }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${active ? 'bg-brand-light text-brand-dark' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'}`}
-    >
-      {icon}
-      {label}
-    </button>
+    <Routes>
+      <Route path="/" element={<LandingPage onGoToLogin={() => navigate('/login')} />} />
+      <Route path="/login" element={
+        <Login onLogin={onSignIn} onSwitchToRegister={() => navigate('/register')} onBackToLanding={() => navigate('/')} onForgotPassword={() => navigate('/forgot-password')} />
+      } />
+      <Route path="/register" element={<Register onRegister={onSignIn} onSwitchToLogin={() => navigate('/login')} />} />
+      <Route path="/forgot-password" element={<ForgotPassword onBack={() => navigate('/login')} />} />
+      <Route path="/reset-password" element={<ResetPassword onDone={onSignIn} onBack={() => navigate('/login')} />} />
+      {/* Anything else while signed out goes to the login screen, keeping the target. */}
+      <Route path="*" element={<Navigate to="/login" replace state={{ from: location.pathname }} />} />
+    </Routes>
+  )
+}
+
+function App() {
+  const { token, user, loading, signIn, signOut, setUser } = useSession()
+
+  if (token && loading) return <Loading />
+
+  return (
+    <BrowserRouter>
+      {token && user
+        ? <AuthedRoutes user={user} onSignOut={signOut} onUserChange={setUser} />
+        : <PublicRoutes onSignIn={signIn} />}
+    </BrowserRouter>
   )
 }
 
