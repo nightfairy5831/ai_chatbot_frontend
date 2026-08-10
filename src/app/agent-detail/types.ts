@@ -45,6 +45,7 @@ export interface Agent {
   slot_minutes: number | null
   public_key: string | null
   public_chat_enabled: boolean
+  allowed_origins: string | null
   products: Product[]
 }
 

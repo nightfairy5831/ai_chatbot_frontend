@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Upload, X, Clock } from 'lucide-react'
-import Request from '../../../lib/request'
+import { useState, useEffect, useCallback } from 'react'
+import { Upload, X, Clock, ShieldCheck, Trash2 } from 'lucide-react'
+import Request, { showToast } from '../../../lib/request'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -24,9 +24,40 @@ export default function ConfigTab({ agent, onSaved }: { agent: Agent; onSaved: (
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
+  const [customers, setCustomers] = useState<{ customer_ref: string; messages: number; channel: string; last_seen: string | null }[]>([])
   const [sinstruction, setSinstruction] = useState<string | null>(agent.sinstruction)
   const [pdfUploading, setPdfUploading] = useState(false)
   const [pdfMsg, setPdfMsg] = useState<string | null>(null)
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      setCustomers(await Request.Get(`/agents/${agent.id}/customers`))
+    } catch { /* the list is a convenience; the rest of the tab still works */ }
+  }, [agent.id])
+
+  useEffect(() => { fetchCustomers() }, [fetchCustomers])
+
+  const eraseCustomer = async (ref: string) => {
+    if (!confirm(`Delete every stored message from ${ref}? This cannot be undone.`)) return
+    try {
+      const data = await Request.Delete(`/agents/${agent.id}/logs?customer_ref=${encodeURIComponent(ref)}`)
+      showToast(`Deleted ${data.deleted} message(s)`)
+      await fetchCustomers()
+    } catch (err) {
+      showToast(errorText(err, 'Could not delete this data'))
+    }
+  }
+
+  const eraseAll = async () => {
+    if (!confirm('Delete the entire conversation history for this agent? This cannot be undone.')) return
+    try {
+      const data = await Request.Delete(`/agents/${agent.id}/logs`)
+      showToast(`Deleted ${data.deleted} message(s)`)
+      await fetchCustomers()
+    } catch (err) {
+      showToast(errorText(err, 'Could not delete the history'))
+    }
+  }
 
   const toggleDay = (day: number) =>
     setWorkDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day].sort())
@@ -233,6 +264,51 @@ export default function ConfigTab({ agent, onSaved }: { agent: Agent; onSaved: (
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
+            <h3 className="text-sm font-semibold text-gray-900 m-0 flex items-center gap-2">
+              <ShieldCheck size={16} className="text-brand" /> Customers &amp; Data
+            </h3>
+            {customers.length > 0 && (
+              <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600" onClick={eraseAll}>
+                Delete all history
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 m-0 mb-4 max-w-lg">
+            Everyone this agent has talked to. Deleting a customer removes their messages and the
+            agent's replies permanently — use it to answer a data deletion request.
+          </p>
+
+          {customers.length === 0 ? (
+            <p className="text-xs text-gray-400 m-0">No conversations recorded yet.</p>
+          ) : (
+            <div className="divide-y divide-gray-50 border border-gray-100 rounded-lg">
+              {customers.map((c) => (
+                <div key={c.customer_ref} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-sm text-gray-900 m-0 truncate">{c.customer_ref.replace(/^web:/, 'Website visitor ')}</p>
+                    <p className="text-xs text-gray-400 m-0">
+                      {c.messages} message{c.messages === 1 ? '' : 's'}
+                      {c.last_seen ? ` · last ${new Date(c.last_seen).toLocaleDateString()}` : ''}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost" size="icon"
+                    className="w-7 h-7 text-gray-400 hover:text-red-600 shrink-0"
+                    title="Delete this customer's data"
+                    onClick={() => eraseCustomer(c.customer_ref)}
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </>

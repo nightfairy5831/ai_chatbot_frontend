@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Calendar, Trash2 } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import Request, { showToast } from '../../../lib/request'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,6 +16,9 @@ export default function CalendarTab({ agentId }: { agentId: number }) {
   const [selectedDate, setSelectedDate] = useState('')
   const [month, setMonth] = useState(new Date().getMonth())
   const [year, setYear] = useState(new Date().getFullYear())
+  const [calendars, setCalendars] = useState<{ id: string; summary: string; primary: boolean }[]>([])
+  const [selectedCalendar, setSelectedCalendar] = useState('primary')
+  const [needsReconnect, setNeedsReconnect] = useState(false)
 
   const fetchBookings = useCallback(async () => {
     setLoading(true)
@@ -26,16 +31,36 @@ export default function CalendarTab({ agentId }: { agentId: number }) {
     }
   }, [agentId])
 
+  const fetchCalendars = useCallback(async () => {
+    try {
+      const data = await Request.Get(`/calendar/agents/${agentId}/calendars`)
+      setCalendars(data.calendars || [])
+      setSelectedCalendar(data.selected || 'primary')
+      setNeedsReconnect(!!data.needs_reconnect)
+    } catch { /* the picker is optional; booking still uses the stored calendar */ }
+  }, [agentId])
+
   const fetchConnection = useCallback(async () => {
     try {
       const data = await Request.Get(`/calendar/agents/${agentId}/connection`)
       const isConnected = !!data
       setConnected(isConnected)
-      if (isConnected) fetchBookings()
+      if (isConnected) { fetchBookings(); fetchCalendars() }
     } catch {
       setConnected(false)
     }
-  }, [agentId, fetchBookings])
+  }, [agentId, fetchBookings, fetchCalendars])
+
+  const chooseCalendar = async (calendarId: string) => {
+    setSelectedCalendar(calendarId)
+    try {
+      await Request.Patch(`/calendar/agents/${agentId}/calendar`, { calendar_id: calendarId })
+      showToast('Calendar updated')
+      await fetchBookings()
+    } catch (err) {
+      showToast(errorText(err, 'Could not change the calendar'))
+    }
+  }
 
   useEffect(() => { fetchConnection() }, [fetchConnection])
 
@@ -112,6 +137,28 @@ export default function CalendarTab({ agentId }: { agentId: number }) {
         </div>
       ) : (
         <>
+          <Card className="mb-4">
+            <CardContent className="p-5">
+              <Label className="block text-xs font-medium text-gray-500 mb-1">Calendar used for bookings</Label>
+              {calendars.length > 0 ? (
+                <Select value={selectedCalendar} onValueChange={(v) => v && chooseCalendar(v)}>
+                  <SelectTrigger className="w-full sm:w-80"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {calendars.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.summary}{c.primary ? ' (primary)' : ''}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="text-xs text-gray-400 m-0">
+                  {needsReconnect
+                    ? 'Reconnect Google Calendar to choose a different calendar — the current connection only granted event access.'
+                    : `Using ${selectedCalendar}.`}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="mb-4">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
