@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Phone, PhoneOff, Globe, Search, Building2, KeyRound } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Phone, PhoneOff, Globe, Search, Building2, KeyRound, BadgeCheck } from 'lucide-react'
 import Request, { showToast } from '../../../lib/request'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { type WhatsappNumber, errorText } from '../types'
+import { loadFacebookSdk, listenForSignup, launchSignup, type MetaConfig, type SignupInfo } from '../../../lib/facebook'
 
 const COUNTRIES = [
   ['US', '🇺🇸 United States (+1)'], ['GB', '🇬🇧 United Kingdom (+44)'], ['CA', '🇨🇦 Canada (+1)'],
@@ -19,11 +20,13 @@ const COUNTRIES = [
   ['AE', '🇦🇪 United Arab Emirates (+971)'],
 ]
 
-type Mode = 'purchase' | 'platform' | 'client'
+type Mode = 'meta' | 'purchase' | 'platform' | 'client'
 
 export default function WhatsappTab({ agentId }: { agentId: number }) {
   const [numbers, setNumbers] = useState<WhatsappNumber[]>([])
-  const [mode, setMode] = useState<Mode>('purchase')
+  const [mode, setMode] = useState<Mode>('meta')
+  const [metaConfig, setMetaConfig] = useState<MetaConfig | null>(null)
+  const signupInfo = useRef<SignupInfo>({})
 
   const [country, setCountry] = useState('US')
   const [available, setAvailable] = useState<{ phone_number: string; friendly_name: string }[]>([])
@@ -42,6 +45,42 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
   }, [agentId])
 
   useEffect(() => { fetchNumbers() }, [fetchNumbers])
+
+  useEffect(() => {
+    Request.Get('/whatsapp/meta/config')
+      .then((cfg: MetaConfig) => { setMetaConfig(cfg); if (!cfg.enabled) setMode('purchase') })
+      .catch(() => setMode('purchase'))
+  }, [])
+
+  // The popup reports the account it created on a separate channel from the
+  // login callback, so collect it as it arrives.
+  useEffect(() => listenForSignup((info) => { signupInfo.current = { ...signupInfo.current, ...info } }), [])
+
+  const connectMeta = async () => {
+    if (!metaConfig?.enabled) return
+    setConnecting(true)
+    try {
+      const sdk = await loadFacebookSdk(metaConfig.app_id, metaConfig.graph_version)
+      const code = await launchSignup(sdk, metaConfig)
+      if (!code) { showToast('WhatsApp connection was cancelled'); return }
+      // The authorization code is short-lived — exchange it immediately.
+      await Request.Post(`/whatsapp/meta/agents/${agentId}/connect`, {
+        code,
+        waba_id: signupInfo.current.waba_id ?? null,
+        phone_number_id: signupInfo.current.phone_number_id ?? null,
+        business_id: signupInfo.current.business_id ?? null,
+        signup_event: signupInfo.current.event ?? null,
+        session_id: signupInfo.current.session_id ?? null,
+      })
+      showToast('WhatsApp Business account connected')
+      signupInfo.current = {}
+      await fetchNumbers()
+    } catch (err) {
+      showToast(errorText(err, 'Could not finish the WhatsApp connection'))
+    } finally {
+      setConnecting(false)
+    }
+  }
 
   const searchAvailable = async () => {
     setSearching(true)
@@ -126,8 +165,24 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
                       <p className="text-sm font-medium text-gray-900 m-0 flex items-center gap-2">
                         {wn.phone_number}
                         <Badge variant="secondary" className="text-[10px] rounded-full px-2 py-0 bg-gray-100 text-gray-500 border border-gray-200">
-                          {wn.provider_mode === 'client' ? 'Your Twilio' : 'Platform'}
+                          {wn.channel_provider === 'meta'
+                            ? (wn.verified_name || 'WhatsApp Business')
+                            : wn.provider_mode === 'client' ? 'Your Twilio' : 'Platform'}
                         </Badge>
+                        {wn.is_on_biz_app && (
+                          <Badge variant="secondary" className="text-[10px] rounded-full px-2 py-0 bg-sky-50 text-sky-600 border border-sky-100">
+                            Coexistence
+                          </Badge>
+                        )}
+                        {wn.quality_rating && (
+                          <Badge variant="secondary" className={`text-[10px] rounded-full px-2 py-0 border ${
+                            wn.quality_rating === 'GREEN' ? 'bg-green-50 text-green-600 border-green-100'
+                              : wn.quality_rating === 'YELLOW' ? 'bg-amber-50 text-amber-600 border-amber-100'
+                                : 'bg-red-50 text-red-500 border-red-100'
+                          }`}>
+                            {wn.quality_rating.toLowerCase()}
+                          </Badge>
+                        )}
                       </p>
                       <p className="text-xs text-green-500 m-0 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
@@ -154,14 +209,41 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
         <CardContent className="p-5">
           <h4 className="text-sm font-semibold text-gray-900 m-0 mb-1">Connect a Number</h4>
           <p className="text-xs text-gray-400 m-0 mb-4">
-            A number must be registered as a WhatsApp sender with Twilio before it can receive WhatsApp messages.
+            Connecting your own WhatsApp Business account is the recommended route. The Twilio options
+            below require a number already registered as a WhatsApp sender.
           </p>
 
           <div className="flex flex-wrap gap-2 mb-5">
+            {metaConfig?.enabled && modeButton('meta', <BadgeCheck size={15} className="text-brand" />,
+              'Connect my WhatsApp', 'Your own account — recommended')}
             {modeButton('purchase', <Globe size={15} className="text-brand" />, 'Buy a number', 'We provide it — billed with your plan')}
             {modeButton('platform', <Building2 size={15} className="text-brand" />, 'Use a platform number', 'Attach a sender we already own')}
             {modeButton('client', <KeyRound size={15} className="text-brand" />, 'Use my Twilio', 'Your account, your billing')}
           </div>
+
+          {mode === 'meta' && (
+            <div>
+              <p className="text-sm text-gray-600 m-0 mb-3 max-w-xl">
+                Connect the WhatsApp Business account your business already owns. You keep the number,
+                the account and the message history — this platform only gets permission to reply on
+                your behalf. If you use the WhatsApp Business app today, you can keep using it on the
+                same number.
+              </p>
+              <ul className="list-none m-0 p-0 mb-4 space-y-1">
+                {['No new number to buy', 'Your own quality rating and limits', 'Disconnect any time'].map((line) => (
+                  <li key={line} className="flex items-center gap-2 text-xs text-gray-500">
+                    <BadgeCheck size={13} className="text-brand shrink-0" /> {line}
+                  </li>
+                ))}
+              </ul>
+              <Button onClick={connectMeta} disabled={connecting}>
+                {connecting ? 'Connecting...' : 'Connect WhatsApp Business'}
+              </Button>
+              <p className="text-xs text-gray-400 m-0 mt-2">
+                Opens a Meta window. You'll sign in with the Facebook account that manages your business.
+              </p>
+            </div>
+          )}
 
           {mode === 'purchase' && (
             <>

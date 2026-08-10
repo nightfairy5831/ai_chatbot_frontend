@@ -25,6 +25,11 @@ export interface WhatsappNumber {
   id: number
   phone_number: string
   provider_mode: string
+  channel_provider: string
+  display_phone_number?: string | null
+  verified_name?: string | null
+  quality_rating?: string | null
+  is_on_biz_app?: boolean
   is_active: boolean
 }
 
