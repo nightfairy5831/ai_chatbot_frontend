@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Trash2, UserCheck, UserX, Search, ShieldCheck, ShieldOff } from 'lucide-react'
 import Request from '../../lib/request'
 import { Card } from '@/components/ui/card'
@@ -7,10 +7,14 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { errorStatus, errorText } from '../../lib/errors'
 
 interface AdminUser {
-  id: number; username: string; email: string; role: string; is_active: boolean; created_at: string | null; agent_count: number
+  id: number; username: string; email: string; role: string; plan: string; message_limit: number
+  is_active: boolean; created_at: string | null; agent_count: number
 }
+
+const PLANS = ['free', 'starter', 'growth', 'scale']
 
 export default function UsersTab({ onLogout }: { onLogout: () => void }) {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -19,32 +23,41 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
   const [status, setStatus] = useState('all')
   const [meId, setMeId] = useState<number | null>(null)
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try { const data = await Request.Get('/admin/users?search='); setUsers(data) }
-    catch (err: any) { if (err.response?.status === 401) onLogout() }
-  }
+    catch (err) { if (errorStatus(err) === 401) onLogout() }
+  }, [onLogout])
 
   useEffect(() => {
-    fetchUsers()
-    Request.Get('/auth/me').then((d) => setMeId(d.id)).catch(() => {})
-  }, [])
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the fetchers await before they touch state
+    void fetchUsers()
+    Request.Get('/auth/me')
+      .then((d) => setMeId(d.id))
+      .catch(() => { /* the table still renders without knowing who "me" is */ })
+  }, [fetchUsers])
 
   const toggleUserActive = async (user: AdminUser) => {
     try { await Request.Patch(`/admin/users/${user.id}`, { is_active: !user.is_active }); fetchUsers() }
-    catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
+    catch (err) { setError(errorText(err, 'Failed')) }
   }
 
   const toggleUserRole = async (user: AdminUser) => {
     const role = user.role === 'admin' ? 'client' : 'admin'
     if (!confirm(`Change ${user.username} to ${role}?`)) return
     try { await Request.Patch(`/admin/users/${user.id}`, { role }); fetchUsers() }
-    catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
+    catch (err) { setError(errorText(err, 'Failed')) }
+  }
+
+  const changePlan = async (user: AdminUser, plan: string) => {
+    if (plan === user.plan) return
+    try { await Request.Patch(`/admin/users/${user.id}`, { plan }); fetchUsers() }
+    catch (err) { setError(errorText(err, 'Failed')) }
   }
 
   const deleteUser = async (user: AdminUser) => {
     if (!confirm(`Delete "${user.username}"?`)) return
     try { await Request.Delete(`/admin/users/${user.id}`); fetchUsers() }
-    catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
+    catch (err) { setError(errorText(err, 'Failed')) }
   }
 
   const filtered = users.filter((u) => {
@@ -82,6 +95,7 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
               <TableRow>
                 <TableHead className="text-xs uppercase tracking-wider">User</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Role</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">Plan</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Agents</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-right">Joined</TableHead>
@@ -99,6 +113,18 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
                     <Badge variant="secondary" className={u.role === 'admin' ? 'bg-brand-light text-brand-dark border border-brand-lighter' : 'bg-gray-50 text-gray-500 border border-gray-100'}>
                       {u.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {u.id === meId ? (
+                      <span className="text-sm text-gray-400">{u.plan}</span>
+                    ) : (
+                      <Select value={u.plan} onValueChange={(v) => v && changePlan(u, v)}>
+                        <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {PLANS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={u.is_active ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-red-50 text-red-500 border border-red-100'}>
@@ -129,7 +155,7 @@ export default function UsersTab({ onLogout }: { onLogout: () => void }) {
                 </TableRow>
               ))}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-400 py-8 text-sm">No users found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-gray-400 py-8 text-sm">No users found</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

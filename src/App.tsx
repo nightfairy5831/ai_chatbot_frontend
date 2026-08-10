@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity, Menu, X, Palette } from 'lucide-react'
+import { Bot, LayoutDashboard, Settings as SettingsIcon, LogOut, Users, Activity, Menu, X, Palette, Plug } from 'lucide-react'
 import LandingPage from './app/landing/page'
 import Login from './app/auth/login/page'
 import Register from './app/auth/register/page'
 import Dashboard from './app/dashboard/page'
 import AgentDetail from './app/agent-detail/page'
 import Settings from './app/settings/page'
-import Admin from './app/admin/page'
+import Admin, { type AdminTab } from './app/admin/page'
 import Request from './lib/request'
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
   const [showLanding, setShowLanding] = useState(true)
   const [authPage, setAuthPage] = useState<'login' | 'register'>('login')
-  const [activePage, setActivePage] = useState<'dashboard' | 'agent-detail' | 'settings' | 'admin-dashboard' | 'admin-users' | 'admin-agents' | 'admin-logs'>('dashboard')
+  const [activePage, setActivePage] = useState<'dashboard' | 'agent-detail' | 'settings' | 'admin-dashboard' | 'admin-users' | 'admin-agents' | 'admin-logs' | 'admin-integrations'>('dashboard')
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null)
   const [testAgentId, setTestAgentId] = useState<number | null>(null)
   const [username, setUsername] = useState<string | null>(null)
@@ -62,6 +62,13 @@ function App() {
     setSelectedAgentId(null)
   }
 
+  useEffect(() => {
+    // request.ts clears the stored token on a 401 and fires this event.
+    const onExpired = () => handleLogout()
+    window.addEventListener('auth:expired', onExpired)
+    return () => window.removeEventListener('auth:expired', onExpired)
+  }, [])
+
   const handleOpenAgent = (agentId: number) => {
     setSelectedAgentId(agentId)
     setActivePage('agent-detail')
@@ -105,6 +112,7 @@ function App() {
               <NavItem active={activePage === 'admin-users'} icon={<Users size={20} />} label="Users" onClick={() => { setActivePage('admin-users'); setSidebarOpen(false) }} />
               <NavItem active={activePage === 'admin-agents'} icon={<Bot size={20} />} label="Agents" onClick={() => { setActivePage('admin-agents'); setSidebarOpen(false) }} />
               <NavItem active={activePage === 'admin-logs'} icon={<Activity size={20} />} label="Activity Logs" onClick={() => { setActivePage('admin-logs'); setSidebarOpen(false) }} />
+              <NavItem active={activePage === 'admin-integrations'} icon={<Plug size={20} />} label="Integrations" onClick={() => { setActivePage('admin-integrations'); setSidebarOpen(false) }} />
             </>
           ) : (
             <>
@@ -157,7 +165,7 @@ function App() {
           {activePage.startsWith('admin-') && (
             <Admin
               onLogout={handleLogout}
-              activeTab={activePage.replace('admin-', '') as 'dashboard' | 'users' | 'agents' | 'logs'}
+              activeTab={activePage.replace('admin-', '') as AdminTab}
               testAgentId={testAgentId}
               onTestAgent={(agentId) => { setTestAgentId(agentId); setActivePage('admin-dashboard') }}
             />
