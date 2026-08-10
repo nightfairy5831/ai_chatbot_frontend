@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import Request from '../../../lib/request'
+import { errorText } from '../../../lib/errors'
 
 function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (token: string) => void; onSwitchToRegister: () => void; onBackToLanding?: () => void }) {
   const [email, setEmail] = useState('')
@@ -18,8 +19,8 @@ function Login({ onLogin, onSwitchToRegister, onBackToLanding }: { onLogin: (tok
     try {
       const data = await Request.Post('/auth/login', { email, password })
       onLogin(data.access_token)
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed')
+    } catch (err) {
+      setError(errorText(err, 'Login failed'))
     } finally {
       setLoading(false)
     }

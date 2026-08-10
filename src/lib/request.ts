@@ -21,9 +21,18 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status
     if (!error.response) {
       showToast('Network error. Please check your connection.')
-    } else if (error.response.status >= 500) {
+    } else if (status === 401) {
+      // The token expired or was revoked: drop it and let the app fall back to
+      // the login screen instead of leaving a signed-out user on a dead page.
+      if (localStorage.getItem('token')) {
+        localStorage.removeItem('token')
+        showToast('Your session expired. Please sign in again.')
+        window.dispatchEvent(new Event('auth:expired'))
+      }
+    } else if (status >= 500) {
       showToast('Server error. Please try again later.')
     }
     return Promise.reject(error)
@@ -57,15 +66,15 @@ const Request = {
     const response = await axiosInstance.get(url)
     return response.data
   },
-  async Post(url: string, data: any) {
+  async Post(url: string, data: unknown) {
     const response = await axiosInstance.post(url, data)
     return response.data
   },
-  async Put(url: string, data: any) {
+  async Put(url: string, data: unknown) {
     const response = await axiosInstance.put(url, data)
     return response.data
   },
-  async Patch(url: string, data: any) {
+  async Patch(url: string, data: unknown) {
     const response = await axiosInstance.patch(url, data)
     return response.data
   },

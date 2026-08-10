@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, Trash2, MessageSquare } from 'lucide-react'
 import Request from '../../lib/request'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { errorStatus, errorText } from '../../lib/errors'
 
 interface AdminAgent {
   id: number; name: string; description: string | null; business_name: string | null; industry: string | null; tone: string | null
@@ -16,17 +17,18 @@ export default function AgentsTab({ onLogout, onTestAgent }: { onLogout: () => v
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     try { const data = await Request.Get('/admin/agents?search='); setAgents(data) }
-    catch (err: any) { if (err.response?.status === 401) onLogout() }
-  }
+    catch (err) { if (errorStatus(err) === 401) onLogout() }
+  }, [onLogout])
 
-  useEffect(() => { fetchAgents() }, [])
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- the fetcher awaits before it touches state
+  useEffect(() => { void fetchAgents() }, [fetchAgents])
 
   const deleteAgent = async (agent: AdminAgent) => {
     if (!confirm(`Delete "${agent.name}"?`)) return
     try { await Request.Delete(`/admin/agents/${agent.id}`); fetchAgents() }
-    catch (err: any) { setError(err.response?.data?.detail || 'Failed') }
+    catch (err) { setError(errorText(err, 'Failed')) }
   }
 
   const filtered = agents.filter((a) => {

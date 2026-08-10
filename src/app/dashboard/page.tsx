@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { errorStatus, errorText } from '../../lib/errors'
 
 interface Agent {
   id: number
@@ -27,10 +28,15 @@ interface Stats {
 interface ActivityLog {
   id: number
   question: string
+  answer: string | null
   agent_name: string
   agent_id: number
   source_channel: string
   created_at: string | null
+}
+
+const CHANNEL_LABELS: Record<string, string> = {
+  web: 'Web', whatsapp: 'WhatsApp', widget: 'Website', admin_test: 'Admin test',
 }
 
 function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgent: (id: number) => void }) {
@@ -61,9 +67,9 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
       ])
       setAgents(agentsData)
       setStats(statsData)
-    } catch (err: any) {
-      if (err.response?.status === 401) { onLogout(); return }
-      setError(err.response?.data?.detail || 'Failed to load dashboard')
+    } catch (err) {
+      if (errorStatus(err) === 401) { onLogout(); return }
+      setError(errorText(err, 'Failed to load dashboard'))
     } finally {
       setLoading(false)
     }
@@ -89,8 +95,8 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
         await Request.Post('/agents/', { name: formName.trim(), description: formDescription.trim() || null })
       }
       closeForm(); await fetchData()
-    } catch (err: any) {
-      setFormError(err.response?.data?.detail || 'Failed to save agent')
+    } catch (err) {
+      setFormError(errorText(err, 'Failed to save agent'))
     } finally { setSaving(false) }
   }
 
@@ -98,7 +104,7 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
     e.stopPropagation()
     if (!confirm(`Delete "${agent.name}"? This cannot be undone.`)) return
     try { await Request.Delete(`/agents/${agent.id}`); await fetchData() }
-    catch (err: any) { setError(err.response?.data?.detail || 'Failed to delete agent') }
+    catch (err) { setError(errorText(err, 'Failed to delete agent')) }
   }
 
   if (loading) {
@@ -204,16 +210,19 @@ function Dashboard({ onLogout, onOpenAgent }: { onLogout: () => void; onOpenAgen
           <Card>
             <div className="divide-y divide-gray-50">
               {logs.slice(0, 8).map((log) => (
-                <div key={log.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors">
+                <div key={log.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors">
                   <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                     <MessageSquare size={14} className="text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 font-medium m-0 truncate">{log.question}</p>
-                    <p className="text-xs text-gray-500 m-0 mt-0.5">{log.agent_name}</p>
+                    <p className="text-sm text-gray-800 font-medium m-0">{log.question}</p>
+                    {log.answer && (
+                      <p className="text-sm text-gray-500 m-0 mt-1 pl-3 border-l-2 border-gray-100 line-clamp-3 whitespace-pre-wrap break-words">{log.answer}</p>
+                    )}
+                    <p className="text-xs text-gray-500 m-0 mt-1">{log.agent_name}</p>
                   </div>
                   <Badge variant="secondary" className={`shrink-0 rounded-full text-xs px-2.5 py-0.5 ${log.source_channel === 'whatsapp' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-brand-light text-brand-dark border border-brand-lighter'}`}>
-                    {log.source_channel}
+                    {CHANNEL_LABELS[log.source_channel] || log.source_channel}
                   </Badge>
                   <span className="text-xs text-gray-500 shrink-0 text-right whitespace-nowrap">
                     {log.created_at ? new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + new Date(log.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—'}

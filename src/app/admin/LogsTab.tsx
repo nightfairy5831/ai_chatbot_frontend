@@ -1,24 +1,31 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search } from 'lucide-react'
 import Request from '../../lib/request'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { errorStatus } from '../../lib/errors'
 
 interface ActivityLog {
-  id: number; question: string; username: string; agent_name: string; agent_id: number; created_at: string | null
+  id: number; question: string; answer: string | null; username: string; agent_name: string
+  agent_id: number; source_channel: string; created_at: string | null
+}
+
+const CHANNEL_LABELS: Record<string, string> = {
+  web: 'Web', whatsapp: 'WhatsApp', widget: 'Website', admin_test: 'Admin test',
 }
 
 export default function LogsTab({ onLogout }: { onLogout: () => void }) {
   const [logs, setLogs] = useState<ActivityLog[]>([])
   const [search, setSearch] = useState('')
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try { const data = await Request.Get('/admin/logs?search='); setLogs(data) }
-    catch (err: any) { if (err.response?.status === 401) onLogout() }
-  }
+    catch (err) { if (errorStatus(err) === 401) onLogout() }
+  }, [onLogout])
 
-  useEffect(() => { fetchLogs() }, [])
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- the fetcher awaits before it touches state
+  useEffect(() => { void fetchLogs() }, [fetchLogs])
 
   const filtered = logs.filter((l) => {
     if (!search) return true
@@ -43,11 +50,17 @@ export default function LogsTab({ onLogout }: { onLogout: () => void }) {
             filtered.slice(0, 50).map((l) => (
               <div key={l.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/50 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 font-medium m-0 truncate">{l.question}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm text-gray-800 font-medium m-0">{l.question}</p>
+                  {l.answer && (
+                    <p className="text-sm text-gray-500 m-0 mt-1 pl-3 border-l-2 border-gray-100 whitespace-pre-wrap break-words">{l.answer}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span className="text-xs text-gray-400">{l.username}</span>
                     <span className="text-xs text-gray-200">·</span>
                     <Badge variant="secondary" className="bg-brand-light text-brand-dark border border-brand-lighter text-xs px-2 py-0 rounded-full">{l.agent_name}</Badge>
+                    <Badge variant="secondary" className="bg-gray-50 text-gray-500 border border-gray-100 text-xs px-2 py-0 rounded-full">
+                      {CHANNEL_LABELS[l.source_channel] || l.source_channel}
+                    </Badge>
                   </div>
                 </div>
                 <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap pt-0.5">

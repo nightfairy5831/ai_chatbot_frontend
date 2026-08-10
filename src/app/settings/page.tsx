@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Request from '../../lib/request'
+import { errorStatus, errorText } from '../../lib/errors'
 
 interface SettingsProps {
   onLogout: () => void
@@ -30,7 +31,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
   const [passwordMsg, setPasswordMsg] = useState<{ text: string; isError: boolean } | null>(null)
 
   // Health check state
-  const [healthResponse, setHealthResponse] = useState<any>(null)
+  const [healthResponse, setHealthResponse] = useState<Record<string, unknown> | null>(null)
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthError, setHealthError] = useState<string | null>(null)
 
@@ -56,7 +57,7 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
         setEmail(data.email)
       })
       .catch((err) => {
-        if (err.response?.status === 401) onLogout()
+        if (errorStatus(err) === 401) onLogout()
       })
       .finally(() => setProfileLoading(false))
     fetchSubscription()
@@ -80,9 +81,9 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
       onUsernameChange(data.username)
       setProfileMsg({ text: 'Profile updated successfully!', isError: false })
       setTimeout(() => setProfileMsg(null), 3000)
-    } catch (err: any) {
+    } catch (err) {
       setProfileMsg({
-        text: err.response?.data?.detail || 'Failed to update profile',
+        text: errorText(err, 'Failed to update profile'),
         isError: true,
       })
     } finally {
@@ -108,12 +109,8 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
       setConfirmPassword('')
       setPasswordMsg({ text: 'Password changed successfully!', isError: false })
       setTimeout(() => setPasswordMsg(null), 3000)
-    } catch (err: any) {
-      const detail = err.response?.data?.detail
-      const message = Array.isArray(detail)
-        ? detail[0]?.msg || 'Validation error'
-        : detail || 'Failed to change password'
-      setPasswordMsg({ text: message, isError: true })
+    } catch (err) {
+      setPasswordMsg({ text: errorText(err, 'Failed to change password'), isError: true })
     } finally {
       setPasswordSaving(false)
     }
@@ -145,8 +142,8 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
     try {
       const data = await Request.Get('/health')
       setHealthResponse(data)
-    } catch (err: any) {
-      setHealthError(err.message || 'Request failed')
+    } catch (err) {
+      setHealthError(errorText(err, 'Request failed'))
     } finally {
       setHealthLoading(false)
     }
@@ -308,9 +305,9 @@ function Settings({ onLogout, onUsernameChange }: SettingsProps) {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {([
-                    { key: 'starter', name: 'Starter', price: 'R$ 197', messages: '1,000', features: ['1 agent', 'Web chat', 'Basic reports'], recommended: false },
-                    { key: 'growth', name: 'Growth', price: 'R$ 397', messages: '5,000', features: ['3 agents', 'WhatsApp integration', 'Advanced insights'], recommended: true },
-                    { key: 'scale', name: 'Scale', price: 'R$ 797', messages: '20,000', features: ['Unlimited agents', 'Calendar booking', 'Priority support'], recommended: false },
+                    { key: 'starter', name: 'Starter', price: 'R$ 197', messages: '1,000', features: ['1 agent', 'Website chat', 'Basic reports'], recommended: false },
+                    { key: 'growth', name: 'Growth', price: 'R$ 397', messages: '5,000', features: ['3 agents', 'WhatsApp integration', 'Google Calendar booking'], recommended: true },
+                    { key: 'scale', name: 'Scale', price: 'R$ 797', messages: '20,000', features: ['Unlimited agents', 'Up to 10 numbers', 'Priority support'], recommended: false },
                   ] as const).map((plan) => {
                     const isCurrent = subscription.plan === plan.key
                     const isRecommended = plan.recommended && !isCurrent

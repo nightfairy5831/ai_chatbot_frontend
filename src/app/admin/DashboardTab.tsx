@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Users, Bot, MessageSquare, UserCheck, Send, TrendingUp, Coins } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import Request from '../../lib/request'
+import Request, { showToast } from '../../lib/request'
 import { Loading } from '@/components/ui/loading'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { errorStatus, errorText } from '../../lib/errors'
 
 interface AdminStats { total_users: number; total_agents: number; total_products: number; total_questions: number; active_users: number }
 interface ChartData { date: string; count: number }
@@ -33,9 +34,9 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
 
   const fetchStats = async () => {
     try { const data = await Request.Get('/admin/stats'); setStats(data) }
-    catch (err: any) {
-      if (err.response?.status === 401) { onLogout(); return }
-      if (err.response?.status === 403) { setError('Admin access required'); return }
+    catch (err) {
+      if (errorStatus(err) === 401) { onLogout(); return }
+      if (errorStatus(err) === 403) { setError('Admin access required'); return }
       setError('Failed to load stats')
     }
   }
@@ -43,18 +44,18 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
     try {
       const [qData, rData, aData] = await Promise.all([Request.Get('/admin/charts/questions'), Request.Get('/admin/charts/registrations'), Request.Get('/admin/charts/agents')])
       setQuestionChart(qData); setRegistrationChart(rData); setAgentChart(aData)
-    } catch {}
+    } catch { showToast('Could not load charts') }
   }
   const fetchTokenUsage = async () => {
     try {
       const [a, d] = await Promise.all([Request.Get('/admin/token-usage/agents'), Request.Get('/admin/token-usage/daily')])
       setTokenByAgent(a); setTokenDaily(d)
-    } catch {}
+    } catch { showToast('Could not load token usage') }
   }
   const fetchAgents = async () => {
     setAgentsLoading(true)
     try { const data = await Request.Get('/admin/agents?search='); setAgents(data) }
-    catch (err: any) { if (err.response?.status === 401) onLogout() }
+    catch (err) { if (errorStatus(err) === 401) onLogout() }
     finally { setAgentsLoading(false) }
   }
 
@@ -71,7 +72,7 @@ export default function DashboardTab({ onLogout, testAgentId: initialTestAgentId
     if (!testAgentId || !testMessage.trim()) return
     setTestLoading(true); setTestResponse('')
     try { const data = await Request.Post(`/admin/agents/${testAgentId}/chat`, { message: testMessage }); setTestResponse(data.response) }
-    catch (err: any) { setTestResponse(`Error: ${err.response?.data?.detail || 'Failed'}`) }
+    catch (err) { setTestResponse(`Error: ${errorText(err, 'Failed')}`) }
     finally { setTestLoading(false) }
   }
 

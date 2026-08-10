@@ -38,12 +38,12 @@ function Register({ onRegister, onSwitchToLogin }: { onRegister: (token: string)
     try {
       const data = await Request.Post('/auth/register', { username: username.trim(), email, password })
       onRegister(data.access_token)
-    } catch (err: any) {
-      const detail = err.response?.data?.detail
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail
       if (typeof detail === 'string') {
         setError(detail)
       } else if (Array.isArray(detail)) {
-        setError(detail[0]?.msg?.replace('Value error, ', '') || 'Falha no registro')
+        setError((detail[0] as { msg?: string })?.msg?.replace('Value error, ', '') || 'Falha no registro')
       } else {
         setError('Falha no registro')
       }
