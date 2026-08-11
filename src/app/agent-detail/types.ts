@@ -24,8 +24,6 @@ export interface TimeSlot {
 export interface WhatsappNumber {
   id: number
   phone_number: string
-  provider_mode: string
-  channel_provider: string
   display_phone_number?: string | null
   verified_name?: string | null
   quality_rating?: string | null

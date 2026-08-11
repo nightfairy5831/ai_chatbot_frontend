@@ -13,10 +13,11 @@ function errorStatus(err: unknown): number | undefined {
 }
 
 interface AdminNumber {
-  id: number; phone_number: string; agent_id: number; user_id: number; provider_mode: string
+  id: number; phone_number: string; agent_id: number; user_id: number
+  display_phone_number: string | null; verified_name: string | null
+  quality_rating: string | null; is_on_biz_app: boolean; waba_status: string | null
   is_active: boolean; created_at: string | null
   owner_username: string | null; owner_email: string | null; agent_name: string | null
-  twilio_account_sid: string | null
 }
 
 interface AdminConnection {
@@ -84,7 +85,7 @@ export default function IntegrationsTab({ onLogout }: { onLogout: () => void }) 
                 <TableHead className="text-xs uppercase tracking-wider">Number</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Owner</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Agent</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider">Provider</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">Account</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Status</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider w-16"></TableHead>
               </TableRow>
@@ -99,9 +100,17 @@ export default function IntegrationsTab({ onLogout }: { onLogout: () => void }) 
                   </TableCell>
                   <TableCell className="text-sm text-gray-500">{n.agent_name || '—'}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={n.provider_mode === 'client' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-sky-50 text-sky-600 border border-sky-100'}>
-                      {n.provider_mode === 'client' ? `client${n.twilio_account_sid ? ` · ${n.twilio_account_sid.slice(0, 8)}…` : ''}` : 'platform'}
-                    </Badge>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <Badge variant="secondary" className="bg-sky-50 text-sky-600 border border-sky-100">
+                        {n.verified_name || 'WhatsApp Business'}
+                      </Badge>
+                      {n.is_on_biz_app && (
+                        <Badge variant="secondary" className="bg-gray-50 text-gray-500 border border-gray-100">coexistence</Badge>
+                      )}
+                      {n.waba_status && n.waba_status !== 'active' && (
+                        <Badge variant="secondary" className="bg-red-50 text-red-500 border border-red-100">{n.waba_status}</Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={n.is_active ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-100'}>
