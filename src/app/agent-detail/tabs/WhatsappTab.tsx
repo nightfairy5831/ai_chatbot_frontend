@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Phone, PhoneOff, BadgeCheck } from 'lucide-react'
+import { Phone, PhoneOff, BadgeCheck, RefreshCw } from 'lucide-react'
 import Request, { showToast } from '../../../lib/request'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -18,6 +18,7 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
   const [numbers, setNumbers] = useState<WhatsappNumber[]>([])
   const [config, setConfig] = useState<MetaConfig | null>(null)
   const [connecting, setConnecting] = useState(false)
+  const [refreshing, setRefreshing] = useState<number | null>(null)
   const signupInfo = useRef<SignupInfo>({})
 
   const fetchNumbers = useCallback(async () => {
@@ -59,6 +60,19 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
       showToast(errorText(err, 'Could not finish the WhatsApp connection'))
     } finally {
       setConnecting(false)
+    }
+  }
+
+  const refreshHealth = async (id: number) => {
+    setRefreshing(id)
+    try {
+      await Request.Post(`/whatsapp/numbers/${id}/health`, {})
+      await fetchNumbers()
+      showToast('Status refreshed')
+    } catch (err) {
+      showToast(errorText(err, 'Could not refresh the status'))
+    } finally {
+      setRefreshing(null)
     }
   }
 
@@ -120,9 +134,19 @@ export default function WhatsappTab({ agentId }: { agentId: number }) {
                       </p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => disconnect(wn.id)}>
-                    <PhoneOff size={14} className="mr-1" /> Disconnect
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost" size="sm" className="text-gray-400 hover:text-gray-700"
+                      title="Refresh quality rating"
+                      disabled={refreshing === wn.id}
+                      onClick={() => refreshHealth(wn.id)}
+                    >
+                      <RefreshCw size={14} className={refreshing === wn.id ? 'animate-spin' : ''} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => disconnect(wn.id)}>
+                      <PhoneOff size={14} className="mr-1" /> Disconnect
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
